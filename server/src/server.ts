@@ -10,7 +10,7 @@ async function startServer(){
     try{
       await pool.query("SELECT NOW()");
       console.log("Database Connected Successfully");
-      app.listen(PORT, ()=> console.log(`Server Running on http://localhost/${PORT}`) )
+      app.listen(PORT, ()=> console.log(`Server Running on http://localhost:${PORT}`) )
     } catch(err){
        console.log("Database Connection Failed: ", err)
     }
