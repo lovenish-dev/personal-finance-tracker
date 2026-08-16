@@ -1,9 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import { loginUser, registerUser } from './auth.service.js'
-
-interface AuthenticatedRequest extends Request {
-  userId?: string;
-}
+import type { AuthRequest } from '../../middlewares/auth.middleware.js';
+ 
 
 export async function register(req:Request, res:Response, next: NextFunction){
     try{
@@ -24,7 +22,7 @@ export async function login(req:Request, res:Response, next:NextFunction){
     }
 }
 
-export function getme(req:AuthenticatedRequest, res:Response){
+export function getme(req:AuthRequest, res:Response){
   if (!req.userId) {
     return res.status(401).json({ message: "Unauthorized" });
   }
