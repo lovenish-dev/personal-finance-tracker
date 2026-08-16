@@ -10,3 +10,8 @@ export async function getAccountByUserId(user_id: number){
     const results = await pool.query("SELECT id, name, type, balance FROM accounts WHERE user_id = $1 ORDER BY created_at DESC", [user_id]);
     return results.rows
 }
+
+export async function getAccountByIdRepo(accountId: number, userId: number){
+   const result = await pool.query("SELECT id, name, type, balance FROM accounts WHERE id = $1 AND user_id = $2", [accountId, userId]);
+   return result.rows[0];
+}
