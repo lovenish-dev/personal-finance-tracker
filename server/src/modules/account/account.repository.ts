@@ -5,3 +5,8 @@ export async function createAccount(user_id:number, data: CreateAccountBody){
     const results = await pool.query("INSERT INTO accounts (user_id, name, type, balance) VALUES ($1, $2, $3, $4) RETURNING id, user_id, name, type, balance", [user_id, data.name, data.type, data.balance])
     return results.rows[0];
 }
+
+export async function getAccountByUserId(user_id: number){
+    const results = await pool.query("SELECT id, name, type, balance FROM accounts WHERE user_id = $1 ORDER BY created_at DESC", [user_id]);
+    return results.rows
+}
