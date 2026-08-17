@@ -6,3 +6,7 @@ export const accountSchema = z.object({
     balance: z.number().min(0, "Balance cannot be negative")
 })
 
+export const updateAccountSchema = z.object({
+   name: z.string().min(2).optional(),
+   type: z.enum(["bank","cash","creadit_card"]).optional()
+})
