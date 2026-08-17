@@ -12,3 +12,9 @@ export async function fetchCategoriesByuserId(userId: number){
                                       FROM categories WHERE user_id = $1 ORDER BY created_at DESC`, [userId]);
      return result.rows
 }
+
+export async function fetchCategoryById(userId: number, id: number){
+     const result = await pool.query(`SELECT id, user_id, name, type, created_at, updated_at FROM
+                                      categories WHERE user_id = $1 AND id = $2`, [userId, id]);
+     return result.rows[0];
+}
