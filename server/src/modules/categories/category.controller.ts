@@ -1,7 +1,7 @@
-import type {Request, Response, NextFunction} from 'express'
+import type { Response, NextFunction} from 'express'
 import type { AuthRequest } from '../../middlewares/auth.middleware.js';
 import { AppError } from '../../utils/Apperror.js';
-import { createCategoryService, getCategoriesByUserIdService, getCategoryByIdService, updateCategoryService } from './category.service.js';
+import { createCategoryService, deleteCategoryService, getCategoriesByUserIdService, getCategoryByIdService, updateCategoryService } from './category.service.js';
 
 export async function createCategory(req: AuthRequest, res: Response, next: NextFunction){
    try{
@@ -39,7 +39,18 @@ export async function updateCategory(req:AuthRequest, res:Response, next:NextFun
     if(!req.userId) throw new AppError("Id Not Found", 401);
     const id = Number(req.params.id);
     const result = await updateCategoryService(id, req.userId, req.body);
-    res.status(201).json({ success: true, message:"Category updated successfully", data: result})
+    res.status(201).json({ success: true, message:"Category updated successfully", data: result });
+   }catch(err){
+     next(err)
+   }
+}
+
+export async function deleteCategory(req:AuthRequest, res:Response, next:NextFunction) {
+   try{
+    if(!req.userId) throw new AppError("Id not found", 401);
+    const id = Number(req.params.id);
+    const result = await deleteCategoryService(id, req.userId);
+    res.status(200).json({ success: true, message:"Category deleted sucessfully", data:result });
    }catch(err){
      next(err)
    }

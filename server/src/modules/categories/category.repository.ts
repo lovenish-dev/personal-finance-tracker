@@ -42,3 +42,8 @@ export async function  modifyCategory(id:number, userId:number, data: UpdateCate
     return result.rows[0]
 
 }
+
+export async function removeCategory(id:number, userId:number){
+     const result = await pool.query(`DELETE FROM categories WHERE id = $1 AND user_id = $2 RETURNING id, user_id, name, type`, [id, userId]);
+     return result.rows[0]
+}
