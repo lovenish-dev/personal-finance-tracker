@@ -5,6 +5,6 @@ export function errorMiddleware(error: unknown, req:Request, res: Response, next
     if(error instanceof AppError){
         return res.status(error.statusCode).json({ success: false, message: error.message })
     }
-
+    console.error('Unhandled Error: ', error)
     return res.status(500).json({ message:"Internal Server Error" });
 }
