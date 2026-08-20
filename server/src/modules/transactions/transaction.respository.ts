@@ -1,6 +1,6 @@
 import pool from "../../config/database.js";
 import type { PoolClient } from "pg";
-import type { CreateTransactionBody } from "./transaction.types.js";
+import type { CreateTransactionBody, TransactionType } from "./transaction.types.js";
 
 export async function getAccountForTransaction(id: number, userid: number){
    const result = await pool.query(`SELECT id FROM accounts WHERE id = $1 AND user_id = $2`,[id, userid]);
@@ -40,4 +40,19 @@ export async function fetchTransactionByUserId(id:number, userId:number){
    const result = await pool.query(`SELECT id, user_id, account_id, category_id, amount, type, description, transaction_date, created_at, updated_at
                                     FROM transactions WHERE id = $1 AND user_id = $2`, [id, userId]);
    return result.rows[0];
+}
+
+export async function removeTransaction(client: PoolClient, userId: number, id: number){
+   const result = await client.query(`DELETE from transactions WHERE id = $1 AND user_id = $2 RETURNING id, user_id, account_id,category_id, amount, type, 
+                                      description, transaction_date, created_at, updated_at`, [id, userId]);
+   return result.rows[0]
+}
+
+export async function reverseAccountBalance(client:PoolClient, transaction:{ account_id: number, amount: number, type: TransactionType }, userId: number){
+   const result = await client.query(`UPDATE accounts SET balance = CASE 
+                                     WHEN $1 = 'income' THEN balance - $2
+                                     WHEN $1 = 'expense' THEN balance + $2
+                                     END, updated_at = CURRENT_TIMESTAMP
+                                     WHERE id = $3 AND user_id = $4 RETURNING id, balance`, [transaction.type, transaction.amount, transaction.account_id, userId]);
+   return result.rows[0]
 }

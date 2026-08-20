@@ -1,6 +1,6 @@
 import pool from "../../config/database.js";
 import { AppError } from "../../utils/Apperror.js";
-import { fetchTransactionByUserId, fetchTransactionsByUserId, getAccountForTransaction, getCategoryForTransactions, insertTransaction, updateAccountBalance } from "./transaction.respository.js";
+import { fetchTransactionByUserId, fetchTransactionsByUserId, getAccountForTransaction, getCategoryForTransactions, insertTransaction, removeTransaction, reverseAccountBalance, updateAccountBalance } from "./transaction.respository.js";
 import type { CreateTransactionBody } from "./transaction.types.js";
 
 export async function createTransactionService( userId: number, data:CreateTransactionBody){
@@ -34,4 +34,22 @@ export async function getTransactionByUserIdService(id: number, userId: number){
    const result = await fetchTransactionByUserId(id, userId)
    if(!result) throw new AppError("Transaction not found", 404)
    return result
+}
+
+export async function deleteTransactionService(userId: number, id: number){
+   const client = await pool.connect();
+   try{
+    await client.query("BEGIN");
+    const deletedTransaction = await removeTransaction(client, userId, id);
+    if(!deletedTransaction) throw new AppError("Transaction not found", 404);
+    const reversingBalance = await reverseAccountBalance(client, deletedTransaction, userId)
+    if(!reversingBalance) throw new AppError("Balance could not be reversed", 500);
+    await client.query("COMMIT")
+    return { deletedTransaction, reversingBalance }
+   }catch(err){
+      await client.query("ROLLBACK")
+      throw err
+   } finally {
+      client.release()
+   }
 }

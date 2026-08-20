@@ -1,5 +1,5 @@
 import type { Response, NextFunction } from 'express';
-import { createTransactionService, getTransactionByUserIdService, getTransactionsByUserIdService } from './transaction.service.js';
+import { createTransactionService, deleteTransactionService, getTransactionByUserIdService, getTransactionsByUserIdService } from './transaction.service.js';
 import type { AuthRequest } from '../../middlewares/auth.middleware.js';
 import { AppError } from '../../utils/Apperror.js';
 
@@ -32,4 +32,15 @@ export async function getTransactionByUserId(req:AuthRequest, res: Response, nex
     }catch(err){
         next(err)
     }
+}
+
+export async function deleteTransaction(req:AuthRequest, res:Response, next:NextFunction){
+   try{
+     if(!req.userId) throw new AppError("Id not found", 401);
+     const id = Number(req.params.id);
+     const result = await deleteTransactionService(req.userId, id);
+     res.status(200).json({ success: true, message:"Transaction deleted successfully", data: result });
+   }catch(err){
+      next(err)
+   }
 }
