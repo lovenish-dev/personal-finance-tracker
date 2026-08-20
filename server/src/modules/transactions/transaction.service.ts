@@ -1,6 +1,6 @@
 import pool from "../../config/database.js";
 import { AppError } from "../../utils/Apperror.js";
-import { getAccountForTransaction, getCategoryForTransactions, insertTransaction, updateAccountBalance } from "./transaction.respository.js";
+import { fetchTransactionByUserId, fetchTransactionsByUserId, getAccountForTransaction, getCategoryForTransactions, insertTransaction, updateAccountBalance } from "./transaction.respository.js";
 import type { CreateTransactionBody } from "./transaction.types.js";
 
 export async function createTransactionService( userId: number, data:CreateTransactionBody){
@@ -23,4 +23,15 @@ export async function createTransactionService( userId: number, data:CreateTrans
    } finally {
       client.release();
    }
+}
+
+export async function getTransactionsByUserIdService(userId: number){
+   const result = await fetchTransactionsByUserId(userId);
+   return result
+}
+
+export async function getTransactionByUserIdService(id: number, userId: number){
+   const result = await fetchTransactionByUserId(id, userId)
+   if(!result) throw new AppError("Transaction not found", 404)
+   return result
 }

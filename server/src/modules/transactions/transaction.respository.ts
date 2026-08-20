@@ -29,3 +29,15 @@ export async function updateAccountBalance(client:PoolClient, userId: number, da
                                         RETURNING id, balance`,[data.type, data.amount, data.accountId, userId]);
       return result.rows[0]
 }
+
+export async function fetchTransactionsByUserId(userId: number){
+   const result = await pool.query(`SELECT id, user_id, account_id,category_id, amount, type, description, transaction_date, created_at, updated_at
+                                    FROM transactions WHERE user_id = $1 ORDER BY transaction_date DESC, created_at DESC`, [userId]);
+   return result.rows
+}
+
+export async function fetchTransactionByUserId(id:number, userId:number){
+   const result = await pool.query(`SELECT id, user_id, account_id, category_id, amount, type, description, transaction_date, created_at, updated_at
+                                    FROM transactions WHERE id = $1 AND user_id = $2`, [id, userId]);
+   return result.rows[0];
+}
