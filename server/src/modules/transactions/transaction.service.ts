@@ -1,7 +1,7 @@
 import pool from "../../config/database.js";
 import { AppError } from "../../utils/Apperror.js";
 import { fetchTransactionByUserId, fetchTransactionsByUserId, getAccountForTransaction, getCategoryForTransactions, getTransactionForUpdate, insertTransaction, modifyTransaction, removeTransaction, reverseAccountBalance, updateAccountBalance } from "./transaction.respository.js";
-import type { CreateTransactionBody, UpdateTransactionBody } from "./transaction.types.js";
+import type { CreateTransactionBody, TransactionFilters, UpdateTransactionBody } from "./transaction.types.js";
 
 export async function createTransactionService( userId: number, data:CreateTransactionBody){
    
@@ -25,8 +25,8 @@ export async function createTransactionService( userId: number, data:CreateTrans
    }
 }
 
-export async function getTransactionsByUserIdService(userId: number){
-   const result = await fetchTransactionsByUserId(userId);
+export async function getTransactionsByUserIdService(userId: number, filters: TransactionFilters){
+   const result = await fetchTransactionsByUserId(userId, filters);
    return result
 }
 

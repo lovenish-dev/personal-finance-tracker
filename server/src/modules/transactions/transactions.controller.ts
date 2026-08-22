@@ -2,6 +2,8 @@ import type { Response, NextFunction } from 'express';
 import { createTransactionService, deleteTransactionService, getTransactionByUserIdService, getTransactionsByUserIdService, updateTransactionService } from './transaction.service.js';
 import type { AuthRequest } from '../../middlewares/auth.middleware.js';
 import { AppError } from '../../utils/Apperror.js';
+import type { TransactionFilters } from './transaction.types.js';
+import { TransactionFilterSchema } from './transaction.schema.js';
 
 export async function createTransaction(req: AuthRequest, res: Response, next: NextFunction){
     try{
@@ -16,7 +18,8 @@ export async function createTransaction(req: AuthRequest, res: Response, next: N
 export async function getTransactionsByUserId(req:AuthRequest, res:Response, next:NextFunction){
     try{
       if(!req.userId) throw new AppError("Id not found", 401);
-      const result = await getTransactionsByUserIdService(req.userId);
+      const filters = TransactionFilterSchema.parse(req.query)
+      const result = await getTransactionsByUserIdService(req.userId, filters);
       res.status(200).json({ success: true, message: "Transactions fetched successfully", data: result })
     }catch(err){
         next(err)

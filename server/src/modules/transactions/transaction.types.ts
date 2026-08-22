@@ -17,3 +17,14 @@ export type UpdateTransactionBody = {
      description?: string,
      transactionDate?:string
 }
+
+export type TransactionFilters = {
+    type?: TransactionType | undefined,
+    accountId?: number | undefined,
+    categoryId?: number | undefined,
+    from? : string | undefined,
+    to?: string | undefined,    
+    page?: number | undefined,
+    limit?: number | undefined
+}
+ 
