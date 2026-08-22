@@ -7,4 +7,6 @@ export const transactionSchema = z.object({
     type: z.enum([ "income", "expense" ]),
     description: z.string().min(2),
     transactionDate: z.string()
-}) 
+})
+
+export const updateTransactionSchema = transactionSchema.partial();
