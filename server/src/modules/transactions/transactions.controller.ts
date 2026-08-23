@@ -30,6 +30,7 @@ export async function getTransactionByUserId(req:AuthRequest, res: Response, nex
     try{
      if(!req.userId) throw new AppError("Id not found", 401);
      const id = Number(req.params.id)
+     if(Number.isNaN(id) || id <= 0) throw new AppError("Invalid transaction id", 400)
      const result = await getTransactionByUserIdService(id, req.userId);
      res.status(200).json({ success: true, message:"Transaction fetched successfully", data: result })
     }catch(err){
@@ -41,6 +42,7 @@ export async function deleteTransaction(req:AuthRequest, res:Response, next:Next
    try{
      if(!req.userId) throw new AppError("Id not found", 401);
      const id = Number(req.params.id);
+     if(Number.isNaN(id) || id <= 0) throw new AppError("Invalid transaction id", 400)
      const result = await deleteTransactionService(req.userId, id);
      res.status(200).json({ success: true, message:"Transaction deleted successfully", data: result });
    }catch(err){
@@ -52,8 +54,9 @@ export async function updateTransaction(req: AuthRequest, res:Response, next:Nex
    try{
      if(!req.userId) throw new AppError("Id not found", 401);
      const id = Number(req.params.id);
+     if(Number.isNaN(id) || id <= 0) throw new AppError("Invalid transaction id", 400)
      const result = await updateTransactionService(req.userId, id, req.body);
-     res.status(201).json({ success: true, message:"Transaction updated successfully", data: result });
+     res.status(200).json({ success: true, message:"Transaction updated successfully", data: result });
    }catch(err){
      next(err)
    }

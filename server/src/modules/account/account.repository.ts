@@ -16,7 +16,7 @@ export async function findAccountById(accountId: number, userId: number){
    return result.rows[0];
 }
 
-export async function updateAccountById(accountId:number, userId:number, data: UpdateAccountBody){
+export async function updateAccount(accountId:number, userId:number, data: UpdateAccountBody){
     const result = await pool.query(`UPDATE accounts SET name = COALESCE($1, name), 
                                      type = COALESCE($2, type),
                                      updated_at = CURRENT_TIMESTAMP

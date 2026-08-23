@@ -7,7 +7,7 @@ export async function createAccount(req:AuthRequest, res:Response, next:NextFunc
   try{
     if(!req.userId) throw new AppError("Id Not Found", 401);
     const result = await createAccountService(req.userId, req.body);
-    res.status(201).json({ success: true, message:"Account Created Successfully", data: result })
+    res.status(200).json({ success: true, message:"Account created successfully", data: result })
   }catch(err){
     next(err)
   }
@@ -17,7 +17,7 @@ export async function getAccounts(req:AuthRequest, res:Response, next:NextFuncti
    try{
     if(!req.userId) throw new AppError("Id Not Found", 401);
     const result = await getAccountsByUserIdService(req.userId);
-    res.status(200).json({ success:true, message:"Accounts Fetched", data: result });
+    res.status(200).json({ success:true, message:"Accounts fetched", data: result });
    }catch(err){
     next(err)
    }
@@ -26,9 +26,10 @@ export async function getAccounts(req:AuthRequest, res:Response, next:NextFuncti
 export async function getAccountById(req:AuthRequest, res:Response, next:NextFunction){
     try{
     if(!req.userId) throw new AppError("Id Not Found", 401);
-    const id = req.params.id
-    const result = await getAccountByIdService(Number(id), req.userId)
-    res.status(200).json({ success: true, message:"Account Fetched", data: result });
+    const id = Number(req.params.id)
+    if(Number.isNaN(id) || id <= 0) throw new AppError("Invalid Account ID", 400);
+    const result = await getAccountByIdService(id, req.userId)
+    res.status(200).json({ success: true, message:"Account fetched", data: result });
     }catch(err){
       next(err)
     }
@@ -38,10 +39,10 @@ export async function updateAccount(req:AuthRequest, res: Response, next:NextFun
   try{
     if(!req.userId) throw new AppError("Id not Found", 401);
     const accountId = Number(req.params.id);
-    if(Number.isNaN(accountId)) throw new AppError("Invalid Account ID", 400);
+    if(Number.isNaN(accountId) || accountId <= 0) throw new AppError("Invalid Account ID", 400);
     const account = await updateAccountService(accountId, req.userId, req.body);
-    res.status(201).json({ success: true, message:"Account Updated", data: account });
+    res.status(201).json({ success: true, message:"Account updated", data: account });
   }catch(err){
-
+     next(err)
   }
 }

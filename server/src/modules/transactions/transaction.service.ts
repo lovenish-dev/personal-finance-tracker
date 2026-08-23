@@ -61,7 +61,8 @@ export async function updateTransactionService(userId: number, id: number, data:
    await client.query("BEGIN");
    const oldTransaction = await getTransactionForUpdate(client, id, userId);
    if(!oldTransaction) throw new AppError("Transaction not found", 404);
-   await reverseAccountBalance(client, oldTransaction, userId);
+   const reversedBalance = await reverseAccountBalance(client, oldTransaction, userId);
+   if(!reversedBalance) throw new AppError("Balance could not be reversed", 500);   
    const newAccountId = data.accountId ?? oldTransaction.account_id;
    const newCategoryId = data.categoryId ?? oldTransaction.category_id;
    const accountOwnership = await getAccountForTransaction(client, newAccountId, userId)
@@ -70,7 +71,7 @@ export async function updateTransactionService(userId: number, id: number, data:
    if(!categoryOwnership) throw new AppError("Category not found", 404);
    const newTransaction = { ...oldTransaction, ...data, account_id: newAccountId, category_id: newCategoryId }
    const updateBalance = await updateAccountBalance(client, userId, {accountId: newAccountId, categoryId: newCategoryId, amount: newTransaction.amount, type: newTransaction.type, description: newTransaction.description, transactionDate:newTransaction.transaction_date})
-   if(!updateBalance) throw new AppError("Insufficient account balance", 500);
+   if(!updateBalance) throw new AppError("Insufficient account balance", 400);
    const updatedTransaction = await modifyTransaction(client,id, userId, {accountId: newAccountId, categoryId: newCategoryId, amount: newTransaction.amount, type: newTransaction.type, description: newTransaction.description, transactionDate:newTransaction.transaction_date});
    if(!updatedTransaction) throw new AppError("Transaction update failed", 500);
    await client.query("COMMIT");

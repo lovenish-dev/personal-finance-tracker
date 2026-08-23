@@ -27,6 +27,7 @@ export async function getCategoryById(req: AuthRequest, res:Response, next: Next
   try{
    if(!req.userId) throw new AppError("Id not Found", 401);
    const id = Number(req.params.id);
+   if(Number.isNaN(id) || id <= 0) throw new AppError("Invalid category id", 400);
    const result = await getCategoryByIdService(req.userId, id);
    res.status(200).json({ success: true, message:"Category fetched successfully", data: result });
   }catch(err){
@@ -38,8 +39,9 @@ export async function updateCategory(req:AuthRequest, res:Response, next:NextFun
    try{
     if(!req.userId) throw new AppError("Id Not Found", 401);
     const id = Number(req.params.id);
+    if(Number.isNaN(id) || id <= 0) throw new AppError("Invalid category id", 400);
     const result = await updateCategoryService(id, req.userId, req.body);
-    res.status(201).json({ success: true, message:"Category updated successfully", data: result });
+    res.status(200).json({ success: true, message:"Category updated successfully", data: result });
    }catch(err){
      next(err)
    }
@@ -49,8 +51,9 @@ export async function deleteCategory(req:AuthRequest, res:Response, next:NextFun
    try{
     if(!req.userId) throw new AppError("Id not found", 401);
     const id = Number(req.params.id);
+    if(Number.isNaN(id) || id <= 0) throw new AppError("Invalid category id", 400);
     const result = await deleteCategoryService(id, req.userId);
-    res.status(200).json({ success: true, message:"Category deleted sucessfully", data:result });
+    res.status(200).json({ success: true, message:"Category deleted successfully", data:result });
    }catch(err){
      next(err)
    }
