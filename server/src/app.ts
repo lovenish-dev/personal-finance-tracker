@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 import authRouter from './modules/auth/auth.routes.js'
 import accountRouter from './modules/account/account.routes.js'
@@ -9,6 +10,7 @@ import { AppError } from './utils/Apperror.js';
 const app = express();
 
 app.use(express.json())
+app.use(cors({ origin: "http://localhost:5173" }))
 
 app.get('/', (req, res)=> res.json({ message: "api running" }));
 
