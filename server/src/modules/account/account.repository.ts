@@ -17,10 +17,19 @@ export async function findAccountById(accountId: number, userId: number){
 }
 
 export async function updateAccount(accountId:number, userId:number, data: UpdateAccountBody){
-    const result = await pool.query(`UPDATE accounts SET name = COALESCE($1, name), 
-                                     type = COALESCE($2, type),
-                                     updated_at = CURRENT_TIMESTAMP
-                                     WHERE id = $3 AND user_id = $4 RETURNING id, user_id, name, type, balance, created_at, updated_at`,[data.name, data.type, accountId, userId]);
+    const result = await pool.query(`UPDATE accounts SET name = COALESCE($1, name), type = COALESCE($2, type),
+                                     updated_at = CURRENT_TIMESTAMP WHERE id = $3 AND user_id = $4 RETURNING id,
+                                     user_id, name, type, balance, created_at, updated_at`,[data.name, data.type, accountId, userId]);
+    return result.rows[0];
+}
+
+export async function transactionExists(accountId: number, userId: number){
+      const result = await pool.query(`SELECT id FROM transactions WHERE account_id = $1 AND user_id = $2`,[accountId, userId]);
+      return result.rowCount
+}
+
+export async function removeAccount(accountId:number, userId: number){
+    const result = await pool.query(`DELETE FROM accounts WHERE id = $1 AND user_id = $2 RETURNING id, name, type, balance`, [accountId, userId]);
     return result.rows[0];
 }
 

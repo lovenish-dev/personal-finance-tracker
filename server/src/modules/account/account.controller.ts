@@ -1,6 +1,6 @@
 import type { Response, NextFunction } from "express";
 import type { AuthRequest } from "../../middlewares/auth.middleware.js";
-import { createAccountService, getAccountByIdService, getAccountsByUserIdService, updateAccountService } from "./account.service.js";
+import { createAccountService, deleteAccountService, getAccountByIdService, getAccountsByUserIdService, updateAccountService } from "./account.service.js";
 import { AppError } from "../../utils/Apperror.js";
 
 export async function createAccount(req:AuthRequest, res:Response, next:NextFunction){
@@ -45,4 +45,16 @@ export async function updateAccount(req:AuthRequest, res: Response, next:NextFun
   }catch(err){
      next(err)
   }
+}
+
+export async function deleteAccount(req:AuthRequest, res:Response, next:NextFunction) {
+   try{    
+    if(!req.userId) throw new AppError("Id not found", 401);
+    const accountId = Number(req.params.id);
+    if(Number.isNaN(accountId)) throw new AppError("Invalid account Id", 400);
+    const deletedAccount = await deleteAccountService(accountId, req.userId);
+    res.status(200).json({ success: true, message: "Account deleted successfully", data: deletedAccount })
+   }catch(err){
+     next(err)
+   }
 }
