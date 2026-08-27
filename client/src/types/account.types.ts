@@ -1,4 +1,4 @@
-export type AccountType = "bank" | "cash" | "credit card" | "";
+export type AccountType = "bank" | "cash" | "credit card" ;
 export type Account = {
     id: number,
     user_id: number,

@@ -13,7 +13,7 @@ export default function Account() {
     const [type, setType] = useState<AccountType>("bank")
     const [balance, setBalance] = useState(0)
     const [editingId, setEditingId] = useState<number | null>(null)
-    const [editType, seteditType] = useState<AccountType | "">("bank")
+    const [editType, seteditType] = useState<AccountType>("bank")
     const [editname, setEditName] = useState("")
 
     useEffect(() => {
@@ -39,7 +39,6 @@ export default function Account() {
 
             setEditingId(null);
             setEditName("");
-            seteditType("")
         } catch (err) {
             dispatch(setError("Failed to update Account"))
         }
@@ -53,7 +52,6 @@ export default function Account() {
 
             setName("")
             setBalance(0)
-            setType("")
         } catch (err) {
             dispatch(setError("Failed to create account"))
         }
@@ -110,12 +108,7 @@ export default function Account() {
                                 <p>Balance: ₹{account.balance}</p>
                                 <button onClick={()=>handleDeleteAccount(account.id)}>Delete</button>
 
-                                <button
-                                    onClick={() => {
-                                        setEditingId(account.id);
-                                        setEditName(account.name);
-                                    }}
-                                >
+                                <button onClick={() => { setEditingId(account.id); setEditName(account.name);}}>
                                     Edit
                                 </button>
                             </>
