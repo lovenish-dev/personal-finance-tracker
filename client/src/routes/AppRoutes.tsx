@@ -3,6 +3,7 @@ import Login from "../pages/auth/login"
 import ProtectedRoutes from "./ProtectedRoutes";
 import Account from "../pages/dashboard/Account";
 import Category from "../pages/dashboard/Category";
+import Transaction from "../pages/dashboard/Transaction";
 
 export default function AppRoutes() {
   return (
@@ -12,6 +13,7 @@ export default function AppRoutes() {
         <Route element={<ProtectedRoutes />}>
           <Route path="/accounts" element={<Account />} />
           <Route path="/categories" element={<Category />} />
+          <Route path="/transactions" element={<Transaction />} />
         </Route>
     </Routes>
   )

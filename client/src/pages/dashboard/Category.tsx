@@ -10,7 +10,7 @@ export default function Category() {
     const [editname, setEditName] = useState("");
     const [type, setType] = useState<CategoryType>("income")
     const [editType, setEditType] = useState<CategoryType>("income")
-    const [editId, setEditId] = useState<number | null>()
+    const [editId, setEditId] = useState<number | null>(0)
 
     const { categories, error, loading } = useAppSelector(state => state.category);
 

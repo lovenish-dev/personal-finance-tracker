@@ -54,7 +54,7 @@ export async function updateAccountBalance(client: PoolClient, userId: number, d
 }
 
 export async function fetchTransactionsByUserId(userId: number, filters: TransactionFilters) {
-  const conditions: string[] = ["user_id = $1"];
+  const conditions: string[] = ["t.user_id = $1"];
   const values: (number | string)[] = [userId];
 
   const page = filters.page ?? 1;
@@ -62,29 +62,32 @@ export async function fetchTransactionsByUserId(userId: number, filters: Transac
   const offset = (page - 1) * limit;
 
   if(filters.type !== undefined){
-    conditions.push(`type = $${values.length + 1}`);
+    conditions.push(`t.type = $${values.length + 1}`);
     values.push(filters.type)
   }
   if(filters.accountId !== undefined) {
-    conditions.push(`account_id = $${values.length + 1}`);
+    conditions.push(`t.account_id = $${values.length + 1}`);
     values.push(filters.accountId)
   }
   if(filters.categoryId !== undefined){
-    conditions.push(`category_id = $${values.length + 1}`);
+    conditions.push(`t.category_id = $${values.length + 1}`);
     values.push(filters.categoryId);
   }
   if(filters.from !== undefined){
-    conditions.push(`transaction_date >= $${values.length + 1}`);
+    conditions.push(`t.transaction_date >= $${values.length + 1}`);
     values.push(filters.from)
   }
   
-  if(filters.to !== undefined){conditions.push(`transaction_date < ($${values.length + 1}::date + INTERVAL '1 day')`); values.push(filters.to)}
+  if(filters.to !== undefined){
+    conditions.push(`t.transaction_date < ($${values.length + 1}::date + INTERVAL '1 day')`);
+    values.push(filters.to)
+  }
 
   const whereClause = conditions.join(" AND ");
 
   const countResult = await pool.query(
     `SELECT COUNT(*)
-     FROM transactions
+     FROM transactions t
      WHERE ${whereClause}`,
     values
   );
@@ -93,8 +96,10 @@ export async function fetchTransactionsByUserId(userId: number, filters: Transac
   const limitPlaceholder = values.length + 1;
   const offsetPlaceholder = values.length + 2;
 
-  const result = await pool.query(`SELECT id, user_id, account_id,category_id, amount, type, description, transaction_date, created_at, 
-    updated_at FROM transactions WHERE ${whereClause} ORDER BY transaction_date DESC, created_at DESC LIMIT $${limitPlaceholder} OFFSET $${offsetPlaceholder}`, [...values, limit, offset]);
+  const result = await pool.query(`SELECT t.id, t.user_id, t.account_id, t.category_id, a.name AS account_name, c.name AS category_name, t.amount, t.type, 
+                                   t.description, t.transaction_date, t.created_at, t.updated_at FROM transactions t JOIN accounts a ON t.account_id = a.id JOIN 
+                                   categories c ON t.category_id = c.id WHERE ${whereClause} ORDER BY t.transaction_date DESC, t.created_at DESC LIMIT $${limitPlaceholder}
+                                   OFFSET $${offsetPlaceholder}`, [...values, limit, offset]);
     const totalPages = Math.ceil(total / limit);
 
    return {
