@@ -1,8 +1,10 @@
-import type { CreateTransaction } from "../types/transaction.types";
+import type { CreateTransaction, TransactionFilters } from "../types/transaction.types";
 import api from "./axios";
 
-export async function getTransactions(){
-    const response = await api.get("/transaction");
+export async function getTransactions(filters?: TransactionFilters){
+    const response = await api.get("/transaction",{
+        params: filters
+    });
     return response.data    
 }
 

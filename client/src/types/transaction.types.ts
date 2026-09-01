@@ -14,6 +14,16 @@ export type Transaction = {
     updated_at: string,
 }
 
+export type TransactionFilters = {
+    type?: TransactionType,
+    accountId?: number,
+    categoryId?: number,
+    from?: string,
+    to?: string,
+    page?: number,
+    limit?: number
+}
+
 export type CreateTransaction = {
     accountId: number,
     categoryId:number,
@@ -23,8 +33,16 @@ export type CreateTransaction = {
     transactionDate: string
 }
 
+export type TransactionPagination = {
+    page: number,
+    limit: number,
+    total: number,
+    totalPages: number
+}
+
 export type TransactionState = {
     transcations: Transaction[],
+    pagination: TransactionPagination;
     loading: boolean,
     error: string | null
 }

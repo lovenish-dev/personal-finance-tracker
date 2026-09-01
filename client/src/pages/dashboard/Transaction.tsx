@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux"
 import { createTransaction, deleteTrasaction, getTransactions, updateTransaction } from "../../api/transaction.api";
 import type { TransactionType } from "../../types/transaction.types"
-import { setTransactions, setError, setLoading, addTransactions, removeTransaction, modifyTransaction } from "../../store/slices/transactionSlice";
+import { setTransactions, setError, setLoading, addTransactions, removeTransaction, modifyTransaction, setPagination } from "../../store/slices/transactionSlice";
 import { getAccounts } from "../../api/account.api";
 import { setAccount, setError as setAccountError, setLoading as setAccountLoading } from "../../store/slices/accountSlice";
 import { setCategories, setError as setCategoryError, setLoading as setCategoryLoading } from "../../store/slices/categorySlice";
@@ -26,23 +26,40 @@ export default function Transaction() {
   const [editDescription, setEditDescription] = useState("");
   const [editTransactionDate, setEditTransactionDate] = useState("");
 
-  const { transcations, error, loading } = useAppSelector(state => state.transaction);
+  const [filterType, setFilterType] = useState<TransactionType | "">("");
+  const [filterAccountId, setFilterAccountId] = useState<number | "">("");
+  const [filterCategoryId, setFilterCategoryId] = useState<number | "">("");
+  const [filterFrom, setFilterFrom] = useState("");
+  const [filterTo, setFilterTo] = useState("");
+  const [page, setPage] = useState(1);
+
+  const { transcations, error, loading, pagination } = useAppSelector(state => state.transaction);
   const { accounts } = useAppSelector(state => state.account);
   const { categories } = useAppSelector(state => state.category);
 
 
-  useEffect(() => {
-    async function fetchTransactions() {
-      try {
-        dispatch(setLoading(true));
-        const response = await getTransactions();
-        dispatch(setTransactions(response.data.transactions));
-      } catch (err) {
-        dispatch(setError("Could not fetch transactions"));
-      } finally {
-        dispatch(setLoading(false))
-      }
+  async function fetchTransactions(pageNumber = 1) {
+    try {
+      dispatch(setLoading(true));
+      const response = await getTransactions({
+        type: filterType || undefined,
+        accountId: filterAccountId || undefined,
+        categoryId: filterCategoryId || undefined,
+        from: filterFrom || undefined,
+        to: filterTo || undefined,
+        page: pageNumber,
+        limit: 10
+      });
+      dispatch(setTransactions(response.data.transactions));
+      dispatch(setPagination(response.data.pagination));
+    } catch (err) {
+      dispatch(setError("Could not fetch transactions"));
+    } finally {
+      dispatch(setLoading(false))
     }
+  }
+
+  useEffect(() => {
     fetchTransactions();
   }, [dispatch])
 
@@ -119,6 +136,45 @@ export default function Transaction() {
     }
   }
 
+  async function handleFilter() {
+    try {
+      setPage(1)
+      dispatch(setLoading(true));
+
+      const response = await getTransactions({
+        type: filterType || undefined,
+        accountId: filterAccountId || undefined,
+        categoryId: filterCategoryId || undefined,
+        from: filterFrom || undefined,
+        to: filterTo || undefined,
+        page: 1,
+        limit: 10
+      })
+
+      dispatch(setTransactions(response.data.transactions));
+      dispatch(setPagination(response.data.pagination))
+    } catch (err) {
+      dispatch(setError("Could not filter Trnasactions"));
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
+  async function handleNextPage() {
+    if (page >= pagination.totalPages) return;
+
+    const nextPage = page + 1;
+    setPage(nextPage);  
+    await fetchTransactions(nextPage)
+  }
+  async function handlePreviousPage() {
+    if (page <= 1) return;
+
+    const previousPage = page - 1;
+    setPage(previousPage);
+    await fetchTransactions(previousPage)
+  }
+
   function handleEdit(transaction: typeof transcations[number]) {
     setEditId(transaction.id);
     setEditAccountId(transaction.account_id);
@@ -137,7 +193,7 @@ export default function Transaction() {
     <main>
       {error && <p>{error}</p>}
       <h1>Transactions</h1>
-      <form method="post" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <select value={accountId} onChange={(e) => setAccountId(Number(e.target.value))}>
           {accounts.map((account) => (
             <option key={account.id} value={account.id}>{account.name}</option>
@@ -157,6 +213,78 @@ export default function Transaction() {
         <input type="date" value={transactionDate} onChange={e => setTransactionDate(e.target.value)} />
         <input type="submit" value="Submit" />
       </form>
+      <div>
+        <select
+          value={filterType}
+          onChange={(e) =>
+            setFilterType(e.target.value as TransactionType | "")
+          }
+        >
+          <option value="">All Types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+
+        <select
+          value={filterAccountId}
+          onChange={(e) =>
+            setFilterAccountId(
+              e.target.value === "" ? "" : Number(e.target.value)
+            )
+          }
+        >
+          <option value="">All Accounts</option>
+
+          {accounts.map((account) => (
+            <option key={account.id} value={account.id}>
+              {account.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filterCategoryId}
+          onChange={(e) =>
+            setFilterCategoryId(
+              e.target.value === "" ? "" : Number(e.target.value)
+            )
+          }
+        >
+          <option value="">All Categories</option>
+
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+
+        <input
+          type="date"
+          value={filterFrom}
+          onChange={(e) => setFilterFrom(e.target.value)}
+        />
+
+        <input
+          type="date"
+          value={filterTo}
+          onChange={(e) => setFilterTo(e.target.value)}
+        />
+
+        <button type="button" onClick={handleFilter}>
+          Apply Filters
+        </button>
+      </div>
+      Pagination
+      {pagination.totalPages > 1 && (
+        <div>
+          <button onClick={handlePreviousPage} disabled={page === 1}>← Previous</button>
+          <span>
+            Page {pagination.page} of {pagination.totalPages}
+          </span>
+          <button onClick={handleNextPage} disabled={page === pagination.totalPages}> Next →</button>
+        </div>
+      )}
       {transcations.length === 0 ? (
         <p>No Transaction exists</p>
       ) : (
@@ -200,6 +328,7 @@ export default function Transaction() {
         )
         )
       )}
+
     </main>
   )
 }
