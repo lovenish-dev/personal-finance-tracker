@@ -3,13 +3,15 @@ import authReducer from "./slices/authSlice"
 import accountReducer from "./slices/accountSlice"
 import categoryReducer from "./slices/categorySlice";
 import transactionReducer from "./slices/transactionSlice";
+import dashboardReducer from "./slices/dashboardSlice"
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
         account: accountReducer,
         category: categoryReducer,
-        transaction: transactionReducer
+        transaction: transactionReducer,
+        dashboard: dashboardReducer
     },
 })
 
