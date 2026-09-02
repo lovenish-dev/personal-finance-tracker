@@ -1,4 +1,3 @@
-import Login from "./pages/auth/login"
 import AppRoutes from "./routes/AppRoutes"
 
 function App() {
