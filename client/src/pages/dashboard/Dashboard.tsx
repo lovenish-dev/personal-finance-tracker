@@ -55,45 +55,151 @@ export default function Dashboard() {
         return <p>Loading...</p>
     }
     return (
-        <section className="dashboard" style={{ display: 'flex', gap: '3em' }}>
-            {error && <p>{error}</p>}
-            {summary && (<div className="dashboard-summary">
-                <h1>Dashboard Summary</h1>
-                Total Expense: {summary?.totalExpense} <br />
-                Total Income:  {summary?.totalIncome} <br />
-                Transaction Count: {summary?.transactionCount} <br />
-            </div>)}
+        <section className="space-y-8">
+            {error && (
+                <p className="rounded-md bg-red-100 p-4 text-red-700">
+                    {error}
+                </p>
+            )}
 
-            <div className="category-summary">
-                <h1>Category Summary</h1>
-                {categorySummary.length === 0 ? <p>No Category Summary</p> : categorySummary.map((catSummary) => (
-                    <div key={catSummary.category + Math.random()}>
-                        <br />
-                        Category Name: {catSummary.category} <br />
-                        Type: {catSummary.type} <br />
-                        Total: {catSummary.total} <br />
-                    </div>
-                ))}
+            {/* Header */}
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                    Dashboard
+                </h1>
+
+                <p className="mt-1 text-gray-500">
+                    Overview of your financial activity
+                </p>
             </div>
-            <div className="recent-transactions">
-                <h1>Recent Transactions</h1>
-                {transcations.length === 0 ? (
-                    <p>No Transactions here</p>
-                ) : (
-                    transcations.map((transaction) => (
-                        <div key={transaction.id} style={{ display: 'flex', alignItems: 'center', justifyContent: "space-between" }}>
-                            <div>
-                                <p>{transaction.description}</p>
-                                <b>Bank:- {transaction.account_name}</b>
-                            </div>
-                            <div>
-                                <p>{transaction.amount}</p>
-                                <p>{transaction.type}</p>
-                            </div>
-                        </div>
-                    ))
-                )}
+
+            {/* Summary Cards */}
+            {summary && (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+
+                    <div className="rounded-xl bg-white p-6 shadow-sm">
+                        <p className="text-sm font-medium text-gray-500">
+                            Total Income
+                        </p>
+
+                        <p className="mt-2 text-2xl font-bold text-green-600">
+                            ₹{summary.totalIncome}
+                        </p>
+                    </div>
+
+                    <div className="rounded-xl bg-white p-6 shadow-sm">
+                        <p className="text-sm font-medium text-gray-500">
+                            Total Expense
+                        </p>
+
+                        <p className="mt-2 text-2xl font-bold text-red-600">
+                            ₹{summary.totalExpense}
+                        </p>
+                    </div>
+
+
+
+                    <div className="rounded-xl bg-white p-6 shadow-sm">
+                        <p className="text-sm font-medium text-gray-500">
+                            Transactions
+                        </p>
+
+                        <p className="mt-2 text-2xl font-bold text-gray-900">
+                            {summary.transactionCount}
+                        </p>
+                    </div>
+
+                </div>
+            )}
+
+            {/* Bottom Section */}
+            <div className="grid gap-8 lg:grid-cols-2">
+
+                {/* Category Summary */}
+                <div className="rounded-xl bg-white p-6 shadow-sm">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                        Category Summary
+                    </h2>
+
+                    <div className="mt-6 space-y-4">
+                        {categorySummary.length === 0 ? (
+                            <p className="text-gray-500">
+                                No category summary available.
+                            </p>
+                        ) : (
+                            categorySummary.map((catSummary) => (
+                                <div
+                                    key={`${catSummary.category}-${catSummary.type}`}
+                                    className="flex items-center justify-between border-b border-gray-100 pb-4"
+                                >
+                                    <div>
+                                        <p className="font-medium text-gray-900">
+                                            {catSummary.category}
+                                        </p>
+
+                                        <p className="text-sm capitalize text-gray-500">
+                                            {catSummary.type}
+                                        </p>
+                                    </div>
+
+                                    <p className="font-semibold text-gray-900">
+                                        ₹{Number(catSummary.total)}
+                                    </p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Recent Transactions */}
+                <div className="rounded-xl bg-white p-6 shadow-sm">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                        Recent Transactions
+                    </h2>
+
+                    <div className="mt-6 space-y-4">
+                        {transcations.length === 0 ? (
+                            <p className="text-gray-500">
+                                No transactions available.
+                            </p>
+                        ) : (
+                            transcations.map((transaction) => (
+                                <div
+                                    key={transaction.id}
+                                    className="flex items-center justify-between border-b border-gray-100 pb-4"
+                                >
+                                    <div>
+                                        <p className="font-medium text-gray-900">
+                                            {transaction.description}
+                                        </p>
+
+                                        <p className="text-sm text-gray-500">
+                                            {transaction.account_name}
+                                        </p>
+                                    </div>
+
+                                    <div className="text-right">
+                                        <p
+                                            className={`font-semibold ${transaction.type === "income"
+                                                    ? "text-green-600"
+                                                    : "text-red-600"
+                                                }`}
+                                        >
+                                            {transaction.type === "income" ? "+" : "-"}₹
+                                            {transaction.amount}
+                                        </p>
+
+                                        <p className="text-sm capitalize text-gray-500">
+                                            {transaction.type}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
             </div>
         </section>
-    )
+    );
 }
