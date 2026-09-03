@@ -4,6 +4,7 @@ import { getCategorySummary, getDashboardSummary } from "../../api/dashboard.api
 import { setCategorySummary, setDashboardSummary, setError, setLoading } from "../../store/slices/dashboardSlice";
 import { getTransactions } from "../../api/transaction.api";
 import { setTransactions } from "../../store/slices/transactionSlice";
+import formatCurrency from "../../utils/formatCurrency";
 
 export default function Dashboard() {
     const dispatch = useAppDispatch();
@@ -83,7 +84,7 @@ export default function Dashboard() {
                         </p>
 
                         <p className="mt-2 text-2xl font-bold text-green-600">
-                            {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(summary.totalIncome)}
+                            {formatCurrency(summary.totalIncome)}
                         </p>
                     </div>
 
@@ -93,7 +94,7 @@ export default function Dashboard() {
                         </p>
 
                         <p className="mt-2 text-2xl font-bold text-red-600">
-                            {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(summary.totalExpense)}
+                            {formatCurrency(summary.totalExpense)}
                         </p>
                     </div>
 
@@ -143,7 +144,7 @@ export default function Dashboard() {
                                     </div>
 
                                     <p className="font-semibold text-gray-900">
-                                        {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(Number(catSummary.total))}
+                                        {formatCurrency(Number(catSummary.total))}
                                     </p>
                                 </div>
                             ))
@@ -186,7 +187,7 @@ export default function Dashboard() {
                                                 }`}
                                         >
                                             {transaction.type === "income" ? "+" : "-"}
-                                            {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(transaction.amount)}
+                                            {formatCurrency(transaction.amount)}
                                         </p>
 
                                         <p className="text-sm capitalize text-gray-500">

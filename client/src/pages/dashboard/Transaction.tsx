@@ -7,6 +7,7 @@ import { getAccounts } from "../../api/account.api";
 import { setAccount, setError as setAccountError, setLoading as setAccountLoading } from "../../store/slices/accountSlice";
 import { setCategories, setError as setCategoryError, setLoading as setCategoryLoading } from "../../store/slices/categorySlice";
 import { getCategories } from "../../api/category.api";
+import formatCurrency from "../../utils/formatCurrency";
 
 export default function Transaction() {
   const dispatch = useAppDispatch();
@@ -672,7 +673,7 @@ export default function Transaction() {
                             "income"
                             ? "+"
                             : "-"}
-                          {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(transaction.amount)}
+                          {formatCurrency(transaction.amount)}
                         </p>
 
                         <div className="flex gap-2">

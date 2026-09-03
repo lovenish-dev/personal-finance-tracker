@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../hooks/redux"
 import { addAccount, removeAccount, setAccount, setError, setLoading, updateAccount, } from "../../store/slices/accountSlice";
 import { createAccount, deleteAccount, getAccounts, updateAccount as updateAccountApi } from "../../api/account.api";
 import type { AccountType } from "../../types/account.types";
+import formatCurrency from "../../utils/formatCurrency";
 
 export default function Account() {
     const dispatch = useAppDispatch();
@@ -237,7 +238,7 @@ return (
                                             </p>
 
                                             <p className="mt-1 text-2xl font-bold text-gray-900">
-                                                {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR' }).format(account.balance)}
+                                                {formatCurrency(account.balance)}
                                             </p>
                                         </div>
 
