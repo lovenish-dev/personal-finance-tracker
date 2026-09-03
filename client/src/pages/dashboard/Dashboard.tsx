@@ -83,7 +83,7 @@ export default function Dashboard() {
                         </p>
 
                         <p className="mt-2 text-2xl font-bold text-green-600">
-                            ₹{summary.totalIncome}
+                            {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(summary.totalIncome)}
                         </p>
                     </div>
 
@@ -93,7 +93,7 @@ export default function Dashboard() {
                         </p>
 
                         <p className="mt-2 text-2xl font-bold text-red-600">
-                            ₹{summary.totalExpense}
+                            {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(summary.totalExpense)}
                         </p>
                     </div>
 
@@ -143,7 +143,7 @@ export default function Dashboard() {
                                     </div>
 
                                     <p className="font-semibold text-gray-900">
-                                        ₹{Number(catSummary.total)}
+                                        {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(Number(catSummary.total))}
                                     </p>
                                 </div>
                             ))
@@ -185,8 +185,8 @@ export default function Dashboard() {
                                                     : "text-red-600"
                                                 }`}
                                         >
-                                            {transaction.type === "income" ? "+" : "-"}₹
-                                            {transaction.amount}
+                                            {transaction.type === "income" ? "+" : "-"}
+                                            {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(transaction.amount)}
                                         </p>
 
                                         <p className="text-sm capitalize text-gray-500">

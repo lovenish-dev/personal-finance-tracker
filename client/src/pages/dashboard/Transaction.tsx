@@ -672,8 +672,7 @@ export default function Transaction() {
                             "income"
                             ? "+"
                             : "-"}
-                          ₹
-                          {transaction.amount}
+                          {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR'}).format(transaction.amount)}
                         </p>
 
                         <div className="flex gap-2">

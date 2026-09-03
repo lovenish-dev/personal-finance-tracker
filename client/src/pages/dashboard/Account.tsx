@@ -162,15 +162,7 @@ return (
                                 className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                             >
                                 {editingId === account.id ? (
-                                    <form
-                                        onSubmit={(e) =>
-                                            handleUpdateAccount(
-                                                e,
-                                                account.id
-                                            )
-                                        }
-                                        className="space-y-4"
-                                    >
+                                    <form onSubmit={(e) => handleUpdateAccount(e, account.id)} className="space-y-4">
                                         <input
                                             type="text"
                                             name="accountName"
@@ -245,7 +237,7 @@ return (
                                             </p>
 
                                             <p className="mt-1 text-2xl font-bold text-gray-900">
-                                                ₹{account.balance}
+                                                {new Intl.NumberFormat('en-US', {style: 'currency', currency:'INR' }).format(account.balance)}
                                             </p>
                                         </div>
 
