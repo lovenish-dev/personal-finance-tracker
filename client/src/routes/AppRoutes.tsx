@@ -6,11 +6,13 @@ import Category from "../pages/dashboard/Category";
 import Transaction from "../pages/dashboard/Transaction";
 import Dashboard from "../pages/dashboard/Dashboard";
 import AppLayout from "../layouts/AppLayout";
+import Register from "../pages/auth/register";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       <Route element={<ProtectedRoutes />}>
         <Route element={<AppLayout />} >
