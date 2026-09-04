@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { logout } from "../store/slices/authSlice";
 import { useAppDispatch } from "../hooks/redux";
 import { useState } from "react";
@@ -14,6 +14,8 @@ export default function Navbar() {
         setLogoutLoading(false)
     }
 
+    const navLinkClass = ({ isActive } : {isActive: boolean})=> `text-sm font-medium transition ${isActive ? "text-blue-600" : "text-gray-600 hover:text-gray-900"}`
+
     return (
         <nav className="border-b border-gray-200 bg-white">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -28,33 +30,21 @@ export default function Navbar() {
 
                 {/* Navigation Links */}
                 <div className="flex items-center gap-6">
-                    <Link
-                        to="/dashboard"
-                        className="text-sm font-medium text-gray-600 hover:text-gray-900"
-                    >
+                    <NavLink to="/dashboard" className={navLinkClass}>
                         Dashboard
-                    </Link>
+                    </NavLink>
 
-                    <Link
-                        to="/accounts"
-                        className="text-sm font-medium text-gray-600 hover:text-gray-900"
-                    >
+                    <NavLink to="/accounts" className={navLinkClass}>
                         Accounts
-                    </Link>
+                    </NavLink>
 
-                    <Link
-                        to="/transactions"
-                        className="text-sm font-medium text-gray-600 hover:text-gray-900"
-                    >
+                    <NavLink to="/transactions" className={navLinkClass}>
                         Transactions
-                    </Link>
+                    </NavLink>
 
-                    <Link
-                        to="/categories"
-                        className="text-sm font-medium text-gray-600 hover:text-gray-900"
-                    >
+                    <NavLink to="/categories" className={navLinkClass}>
                         Categories
-                    </Link>
+                    </NavLink>
                 </div>
 
                 {/* Logout */}
