@@ -4,10 +4,12 @@ import { createTransaction, deleteTrasaction, getTransactions, updateTransaction
 import type { TransactionType } from "../../types/transaction.types"
 import { setTransactions, setError, setLoading, addTransactions, removeTransaction, modifyTransaction, setPagination } from "../../store/slices/transactionSlice";
 import { getAccounts } from "../../api/account.api";
-import { setAccount, setError as setAccountError, setLoading as setAccountLoading } from "../../store/slices/accountSlice";
-import { setCategories, setError as setCategoryError, setLoading as setCategoryLoading } from "../../store/slices/categorySlice";
+import { setAccount, setError as setAccountError } from "../../store/slices/accountSlice";
+import { setCategories, setError as setCategoryError } from "../../store/slices/categorySlice";
 import { getCategories } from "../../api/category.api";
 import formatCurrency from "../../utils/formatCurrency";
+import Loading from "../../components/Loading";
+import ButtonLoader from "../../components/ButtonLoader";
 
 export default function Transaction() {
   const dispatch = useAppDispatch();
@@ -33,6 +35,9 @@ export default function Transaction() {
   const [filterFrom, setFilterFrom] = useState("");
   const [filterTo, setFilterTo] = useState("");
   const [page, setPage] = useState(1);
+
+  const [addingTransaction, setAddingTransaction] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState(false) 
 
   const { transcations, error, loading, pagination } = useAppSelector(state => state.transaction);
   const { accounts } = useAppSelector(state => state.account);
@@ -67,13 +72,10 @@ export default function Transaction() {
   useEffect(() => {
     async function fetchAccounts() {
       try {
-        dispatch(setAccountLoading(true))
         const response = await getAccounts();
         dispatch(setAccount(response.data))
       } catch (err) {
         dispatch(setAccountError("Could not fetch accounts"))
-      } finally {
-        dispatch(setAccountLoading(false))
       }
     }
     fetchAccounts()
@@ -82,14 +84,11 @@ export default function Transaction() {
   useEffect(() => {
     async function fetchCategories() {
       try {
-        dispatch(setCategoryLoading(true))
         const response = await getCategories();
         dispatch(setCategories(response.data))
       } catch (err) {
         dispatch(setCategoryError("Could not fetch accounts"))
-      } finally {
-        dispatch(setCategoryLoading(false))
-      }
+      } 
     }
     fetchCategories()
   }, [dispatch])
@@ -109,10 +108,13 @@ export default function Transaction() {
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     try {
+      setAddingTransaction(true)
       const response = await createTransaction({ accountId, categoryId, amount, type, description, transactionDate });
       dispatch(addTransactions(response.data));
     } catch (err) {
       dispatch(setError("Could not create transaction"))
+    } finally {
+      setAddingTransaction(false)
     }
   }
 
@@ -129,18 +131,20 @@ export default function Transaction() {
   async function handleUpdateTransaction(e: React.SubmitEvent<HTMLFormElement>, id: number) {
     e.preventDefault()
     try {
+      setEditingTransaction(true)
       const response = await updateTransaction(id, { accountId: editAccountId, categoryId: editCategoryId, amount: editAmount, type: editType, description: editDescription, transactionDate: editTransactionDate });
       dispatch(modifyTransaction(response.data.transaction))
       setEditId(null)
     } catch (err) {
       dispatch(setError("Could not update transaction"))
+    } finally {
+      setEditingTransaction(false)
     }
   }
 
   async function handleFilter() {
     try {
       setPage(1)
-      dispatch(setLoading(true));
 
       const response = await getTransactions({
         type: filterType || undefined,
@@ -156,9 +160,7 @@ export default function Transaction() {
       dispatch(setPagination(response.data.pagination))
     } catch (err) {
       dispatch(setError("Could not filter Trnasactions"));
-    } finally {
-      dispatch(setLoading(false))
-    }
+    } 
   }
 
   async function handleNextPage() {
@@ -187,7 +189,7 @@ export default function Transaction() {
   }
 
   if (loading) {
-    return <>Loading.....</>
+    return <Loading />
   }
 
   return (
@@ -327,9 +329,10 @@ export default function Transaction() {
             <div className="sm:col-span-2 lg:col-span-3">
               <button
                 type="submit"
-                className="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
+                disabled={addingTransaction}
+                className="w-full rounded-lg flex justify-center cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
               >
-                Add Transaction
+                {addingTransaction ? <ButtonLoader /> : "Add Transaction"}
               </button>
             </div>
           </form>
@@ -605,9 +608,10 @@ export default function Transaction() {
                       <div className="flex gap-2 sm:col-span-2 lg:col-span-3">
                         <button
                           type="submit"
-                          className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                          disabled={editingTransaction}
+                          className="rounded-lg cursor-pointer flex justify-center disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
                         >
-                          Save Changes
+                          {editingTransaction ? <ButtonLoader /> : "Save Changes"}
                         </button>
 
                         <button
@@ -615,7 +619,7 @@ export default function Transaction() {
                           onClick={() =>
                             setEditId(null)
                           }
-                          className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                          className="rounded-lg cursor-pointer border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
                           Cancel
                         </button>
@@ -683,7 +687,7 @@ export default function Transaction() {
                                 transaction
                               )
                             }
-                            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                            className="rounded-lg border border-gray-300 cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                           >
                             Edit
                           </button>
@@ -694,7 +698,7 @@ export default function Transaction() {
                                 transaction.id
                               )
                             }
-                            className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                            className="rounded-lg border border-red-200 cursor-pointer px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
                           >
                             Delete
                           </button>

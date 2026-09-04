@@ -3,6 +3,7 @@ import { useAppDispatch } from "../../hooks/redux"
 import { registerUser } from "../../api/auth.api";
 import { setCredentials } from "../../store/slices/authSlice";
 import { Link } from "react-router-dom";
+import ButtonLoader from "../../components/ButtonLoader";
 
 export default function Register() {
     const dispatch = useAppDispatch();
@@ -12,12 +13,12 @@ export default function Register() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("")
-    const [loading, setLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>){
         e.preventDefault()
         try{
-            setLoading(true)
+            setIsSubmitting(true)
             if(password.trim() !== confirmPassword.trim()){ setError("Passwords do not match"); return}
             const response = await registerUser({name, email, password});
             dispatch(setCredentials(response.data));
@@ -27,7 +28,7 @@ export default function Register() {
         }catch(err){
             setError("Could not register user")
         } finally{
-            setLoading(false)
+            setIsSubmitting(false)
         }
     }
 return (
@@ -126,10 +127,10 @@ return (
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isSubmitting}
+          className="w-full rounded-md bg-blue-600 px-4 py-2 flex justify-center cursor-pointer font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Creating account..." : "Create Account"}
+          {isSubmitting ? <ButtonLoader /> : "Create Account"}
         </button>
 
         <p className="text-center text-sm text-gray-500">

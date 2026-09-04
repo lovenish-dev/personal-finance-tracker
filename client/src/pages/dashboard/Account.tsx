@@ -4,6 +4,8 @@ import { addAccount, removeAccount, setAccount, setError, setLoading, updateAcco
 import { createAccount, deleteAccount, getAccounts, updateAccount as updateAccountApi } from "../../api/account.api";
 import type { AccountType } from "../../types/account.types";
 import formatCurrency from "../../utils/formatCurrency";
+import Loading from "../../components/Loading";
+import ButtonLoader from "../../components/ButtonLoader";
 
 export default function Account() {
     const dispatch = useAppDispatch();
@@ -15,7 +17,9 @@ export default function Account() {
     const [balance, setBalance] = useState(0)
     const [editingId, setEditingId] = useState<number | null>(null)
     const [editType, seteditType] = useState<AccountType>("bank")
-    const [editname, setEditName] = useState("")
+    const [editname, setEditName] = useState("");
+    const [addingAccount, setAddingAccount] = useState(false)
+    const [editingAccount, setEditingAccount] = useState(false)
 
     useEffect(() => {
         async function fetchAccounts() {
@@ -35,46 +39,47 @@ export default function Account() {
     async function handleUpdateAccount(e: React.SubmitEvent<HTMLFormElement>, id: number) {
         e.preventDefault()
         try {
+            setEditingAccount(true)
             const response = await updateAccountApi(id, { name: editname, type: editType })
             dispatch(updateAccount(response.data));
-
+            
             setEditingId(null);
             setEditName("");
         } catch (err) {
             dispatch(setError("Failed to update Account"))
+        } finally {
+            setEditingAccount(false)
         }
     }
 
     async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
         try {
+            setAddingAccount(true)
             const response = await createAccount({ name, type, balance: Number(balance) })
             dispatch(addAccount(response.data));
-
+            
             setName("")
             setBalance(0)
         } catch (err) {
             dispatch(setError("Failed to create account"))
+        } finally {
+            setAddingAccount(false)
         }
     }
 
     async function handleDeleteAccount(id: number){
         try{
-            dispatch(setLoading(true))
             const response = await deleteAccount(id);
             dispatch(removeAccount(response.data.id))
         }catch(err){
             dispatch(setError("Failed to delete account"))
-        }
+        }  
     }
-
-    if (loading) {
-        return <p>Loading...</p>
-    }
-
-
+ 
 return (
     <section className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+
         <div className="mx-auto max-w-5xl">
 
             {/* Header */}
@@ -136,9 +141,10 @@ return (
 
                     <button
                         type="submit"
-                        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        disabled={addingAccount}
+                        className="rounded-lg bg-blue-600 flex justify-center cursor-pointer px-5 py-2.5 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
-                        Add Account
+                        {addingAccount ? <ButtonLoader /> : "Add Account"}
                     </button>
                 </form>
             </div>
@@ -149,7 +155,7 @@ return (
                     Your Accounts
                 </h2>
 
-                {accounts.length === 0 ? (
+             {loading ? <Loading />  : (accounts.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-gray-300 bg-white py-12 text-center">
                         <p className="text-gray-500">
                             No accounts found.
@@ -200,9 +206,10 @@ return (
                                         <div className="flex gap-2">
                                             <button
                                                 type="submit"
-                                                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                                disabled={editingAccount}
+                                                className="flex-1 rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 flex justify-center px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                                             >
-                                                Save
+                                                {editingAccount ? <ButtonLoader /> : "Save"}
                                             </button>
 
                                             <button
@@ -210,7 +217,7 @@ return (
                                                 onClick={() =>
                                                     setEditingId(null)
                                                 }
-                                                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                                className="flex-1 rounded-lg border cursor-pointer border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                                             >
                                                 Cancel
                                             </button>
@@ -250,7 +257,7 @@ return (
                                                     setEditName(account.name);
                                                     seteditType(account.type);
                                                 }}
-                                                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                                                className="flex-1 rounded-lg border cursor-pointer border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                                             >
                                                 Edit
                                             </button>
@@ -261,7 +268,7 @@ return (
                                                         account.id
                                                     )
                                                 }
-                                                className="flex-1 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                                                className="flex-1 rounded-lg border cursor-pointer border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
                                             >
                                                 Delete
                                             </button>
@@ -271,7 +278,7 @@ return (
                             </div>
                         ))}
                     </div>
-                )}
+                ))}
             </div>
         </div>
     </section>

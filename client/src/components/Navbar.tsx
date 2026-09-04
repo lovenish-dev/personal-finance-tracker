@@ -1,12 +1,17 @@
 import { Link } from "react-router-dom";
 import { logout } from "../store/slices/authSlice";
 import { useAppDispatch } from "../hooks/redux";
+import { useState } from "react";
+import ButtonLoader from "./ButtonLoader";
 
 export default function Navbar() {
     const dispatch = useAppDispatch();
+    const [logoutLoading, setLogoutLoading] = useState<boolean>(false)
 
     function handleLogout() {
+        setLogoutLoading(true)
         dispatch(logout());
+        setLogoutLoading(false)
     }
 
     return (
@@ -55,9 +60,10 @@ export default function Navbar() {
                 {/* Logout */}
                 <button
                     onClick={handleLogout}
-                    className="rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
+                    disabled={logoutLoading}
+                    className='rounded-md flex justify-center bg-red-500 disabled:bg-red-400 cursor-pointer px-4 py-2 text-sm font-medium text-white hover:bg-red-600'
                 >
-                    Logout
+                    { logoutLoading ? <ButtonLoader /> : "Logout" }
                 </button>
             </div>
         </nav>

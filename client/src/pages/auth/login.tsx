@@ -1,27 +1,32 @@
-import React, { useState } from 'react'
+import React, { useState, type CSSProperties } from 'react'
 import { useAppDispatch } from '../../hooks/redux'
 import { loginUser } from '../../api/auth.api';
 import { setCredentials } from '../../store/slices/authSlice';
 import { Link } from 'react-router-dom';
-
+import ButtonLoader from '../../components/ButtonLoader';
+ 
 export default function Login() {
     const dispatch = useAppDispatch();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
 
         try {
+            setIsSubmitting(true)
             const response = await loginUser({ email, password })
             dispatch(setCredentials({
                 user: response.data.user,
                 token: response.data.token
             }));
-            console.log("Login Successfully: ", response.data.user, response.data.token);
+            setTimeout(()=>{ window.location.href = "/dashboard" },1500)
         } catch (err) {
             console.log("Login Failed: ", err)
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -79,9 +84,10 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+                        disabled={isSubmitting}
+                        className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium flex justify-center text-white transition hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
-                        Login
+                        {isSubmitting ? <ButtonLoader /> : "Login"}
                     </button>
                     <p className="text-center text-sm text-gray-500">
                         New to the application?{" "}
@@ -91,6 +97,7 @@ export default function Login() {
                         >
                             Register
                         </Link>
+ 
                     </p>
                 </form>
             </div>

@@ -5,6 +5,7 @@ import { setCategorySummary, setDashboardSummary, setError, setLoading } from ".
 import { getTransactions } from "../../api/transaction.api";
 import { setTransactions } from "../../store/slices/transactionSlice";
 import formatCurrency from "../../utils/formatCurrency";
+import Loading from "../../components/Loading";
 
 export default function Dashboard() {
     const dispatch = useAppDispatch();
@@ -53,15 +54,12 @@ export default function Dashboard() {
     }, [])
 
     if (loading) {
-        return <p>Loading...</p>
+        return <Loading />
     }
+    
     return (
         <section className="space-y-8">
-            {error && (
-                <p className="rounded-md bg-red-100 p-4 text-red-700">
-                    {error}
-                </p>
-            )}
+            {error && (<p className="rounded-md bg-red-100 p-4 text-red-700">{error}</p>)}
 
             {/* Header */}
             <div>
