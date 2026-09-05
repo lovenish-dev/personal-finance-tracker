@@ -13,6 +13,13 @@ export type CategorySummary = {
 export type DashboardState = {
     summary: DashboardSummary | null,
     categorySummary: CategorySummary[],
+    monthlySummary: MonthlySummary[],
     loading: boolean,
     error: string | null
+}
+
+export type MonthlySummary = {
+    month: string,
+    income: number,
+    expense: number,
 }

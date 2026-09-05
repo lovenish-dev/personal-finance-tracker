@@ -9,3 +9,8 @@ export async function getCategorySummary(){
     const response = await api.get("/dashboard/category");
     return response.data
 }
+
+export async function getMonthlySummary(){
+    const response = await api.get("/dashboard/monthly");
+    return response.data
+}

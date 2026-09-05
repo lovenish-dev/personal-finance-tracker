@@ -1,10 +1,11 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CategorySummary, DashboardState, DashboardSummary } from "../../types/dashboard.types";
+import type { CategorySummary, DashboardState, DashboardSummary, MonthlySummary } from "../../types/dashboard.types";
 
 
 const initialState: DashboardState = {
     summary: null,
     categorySummary: [],
+    monthlySummary:[],
     loading: false,
     error: null
 }
@@ -19,6 +20,9 @@ const dashboardSlice = createSlice({
         setCategorySummary: (state, action: PayloadAction<CategorySummary[]>)=>{
             state.categorySummary = action.payload
         },
+        setMonthlySummary: (state, action: PayloadAction<MonthlySummary[]>) =>{
+            state.monthlySummary = action.payload
+        },
         setLoading:(state, action: PayloadAction<boolean>)=>{
             state.loading = action.payload
         },
@@ -28,5 +32,5 @@ const dashboardSlice = createSlice({
     }
 })
 
-export const { setCategorySummary, setDashboardSummary, setError, setLoading } = dashboardSlice.actions
+export const { setCategorySummary,setMonthlySummary, setDashboardSummary, setError, setLoading } = dashboardSlice.actions
 export default dashboardSlice.reducer
