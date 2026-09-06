@@ -5,13 +5,18 @@ import { addCategories, modifyCategory, removeCategory, setCategories, setError,
 import type { CategoryType } from "../../types/category.types";
 import Loading from "../../components/Loading";
 import ButtonLoader from "../../components/ButtonLoader";
+import { createCategorySchema, editCategorySchema } from "../../schema/categories.schema";
 
 export default function Category() {
     const dispatch = useAppDispatch();
+
     const [name, setName] = useState("");
-    const [editname, setEditName] = useState("");
+    const [editName, seteditName] = useState("");
     const [type, setType] = useState<CategoryType>("income")
     const [editType, setEditType] = useState<CategoryType>("income")
+
+    const [createCategoryError, setCreateCategoryError] = useState<Record<string, string>>({})
+    const [editCategoryError, setEditCategoryError] = useState<Record<string, string>>({})
     const [editId, setEditId] = useState<number | null>(0)
     const [addingCategory, setAddingCategory] = useState(false);
     const [editingCategory, setEditingCategory] = useState(false);
@@ -36,6 +41,25 @@ export default function Category() {
 
     async function handleCreateCategory(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
+        const result = createCategorySchema.safeParse({ name, type })
+
+        if (!result.success) {
+            const errors: Record<string, string> = {}
+
+            for (const issue of result.error.issues) {
+                const field = issue.path[0];
+
+                if (typeof field === "string") {
+                    errors[field] = issue.message
+                }
+            }
+
+            setCreateCategoryError(errors)
+            return
+        }
+
+
+        setCreateCategoryError({});
         try {
             setAddingCategory(true)
             const response = await createCategory({ name, type });
@@ -60,12 +84,29 @@ export default function Category() {
 
     async function handleUpdateCategory(e: React.SubmitEvent<HTMLFormElement>, id: number) {
         e.preventDefault();
+        const result = editCategorySchema.safeParse({ name: editName, type: editType })
+
+        if (!result.success) {
+            const errors: Record<string, string> = {}
+
+            for (const issue of result.error.issues) {
+                const field = issue.path[0];
+
+                if (typeof field === "string") {
+                    errors[field] = issue.message
+                }
+            }
+
+            setEditCategoryError(errors)
+            return
+        }
+        setEditCategoryError({})
         try {
             setEditingCategory(true)
-            const response = await updateSingleCategory(id, { name: editname, type: editType });
+            const response = await updateSingleCategory(id, { name: editName, type: editType });
             dispatch(modifyCategory(response.data))
 
-            setEditName("")
+            seteditName("")
             setEditId(null)
         } catch (err) {
             dispatch(setError("Could not update category"))
@@ -121,6 +162,11 @@ export default function Category() {
                                 placeholder="e.g. Food, Salary"
                                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
+                            {createCategoryError.name && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {createCategoryError.name}
+                                </p>
+                            )}
                         </div>
 
                         <div>
@@ -142,6 +188,11 @@ export default function Category() {
                                 <option value="income">Income</option>
                                 <option value="expense">Expense</option>
                             </select>
+                            {createCategoryError.type && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {createCategoryError.type}
+                                </p>
+                            )}
                         </div>
 
                         <div className="flex items-end">
@@ -150,7 +201,7 @@ export default function Category() {
                                 disabled={addingCategory}
                                 className="w-full rounded-lg cursor-pointer flex justify-center disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
-                                { addingCategory ? <ButtonLoader /> : "Add Category" }
+                                {addingCategory ? <ButtonLoader /> : "Add Category"}
                             </button>
                         </div>
                     </form>
@@ -198,14 +249,19 @@ export default function Category() {
                                                     <input
                                                         type="text"
                                                         id={`edit-name-${category.id}`}
-                                                        value={editname}
+                                                        value={editName}
                                                         onChange={(e) =>
-                                                            setEditName(
+                                                            seteditName(
                                                                 e.target.value
                                                             )
                                                         }
                                                         className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                                     />
+                                                    {editCategoryError.name && (
+                                                        <p className="mt-1 text-sm text-red-600">
+                                                            {editCategoryError.name}
+                                                        </p>
+                                                    )}
                                                 </div>
 
                                                 <div>
@@ -233,6 +289,11 @@ export default function Category() {
                                                             Expense
                                                         </option>
                                                     </select>
+                                                    {editCategoryError.type && (
+                                                        <p className="mt-1 text-sm text-red-600">
+                                                            {editCategoryError.type}
+                                                        </p>
+                                                    )}
                                                 </div>
 
                                                 <div className="flex gap-2">
@@ -247,7 +308,7 @@ export default function Category() {
                                                     <button
                                                         type="button"
                                                         onClick={() =>
-                                                            setEditId(null)
+                                                           { setEditId(null); setEditCategoryError({})}
                                                         }
                                                         className="flex-1 rounded-lg border cursor-pointer border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                                                     >
@@ -266,9 +327,9 @@ export default function Category() {
 
                                                         <span
                                                             className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${category.type ===
-                                                                    "income"
-                                                                    ? "bg-green-100 text-green-700"
-                                                                    : "bg-red-100 text-red-700"
+                                                                "income"
+                                                                ? "bg-green-100 text-green-700"
+                                                                : "bg-red-100 text-red-700"
                                                                 }`}
                                                         >
                                                             {category.type}
@@ -322,7 +383,7 @@ export default function Category() {
                                                     <button
                                                         onClick={() => {
                                                             setEditId(category.id);
-                                                            setEditName(
+                                                            seteditName(
                                                                 category.name
                                                             );
                                                             setEditType(

@@ -10,6 +10,7 @@ import { getCategories } from "../../api/category.api";
 import formatCurrency from "../../utils/formatCurrency";
 import Loading from "../../components/Loading";
 import ButtonLoader from "../../components/ButtonLoader";
+import { createTransactionSchema, editTransactionSchema } from "../../schema/transactions.schema";
 
 export default function Transaction() {
   const dispatch = useAppDispatch();
@@ -21,6 +22,10 @@ export default function Transaction() {
   const [type, setType] = useState<TransactionType>("income");
   const [description, setDescription] = useState("");
   const [transactionDate, setTransactionDate] = useState("");
+
+  const [createTransactionError, setCreateTransactionError] = useState<Record<string, string>>({})
+  const [editTransactionError, setEditTransactionError] = useState<Record<string, string>>({})
+
 
   const [editAccountId, setEditAccountId] = useState(0);
   const [editCategoryId, setEditCategoryId] = useState(0);
@@ -37,7 +42,7 @@ export default function Transaction() {
   const [page, setPage] = useState(1);
 
   const [addingTransaction, setAddingTransaction] = useState(false)
-  const [editingTransaction, setEditingTransaction] = useState(false) 
+  const [editingTransaction, setEditingTransaction] = useState(false)
 
   const { transcations, error, loading, pagination } = useAppSelector(state => state.transaction);
   const { accounts } = useAppSelector(state => state.account);
@@ -88,7 +93,7 @@ export default function Transaction() {
         dispatch(setCategories(response.data))
       } catch (err) {
         dispatch(setCategoryError("Could not fetch accounts"))
-      } 
+      }
     }
     fetchCategories()
   }, [dispatch])
@@ -107,6 +112,25 @@ export default function Transaction() {
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
+    const result = createTransactionSchema.safeParse({ accountId, categoryId, type, amount, transactionDate, description })
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+
+      for (const issue of result.error.issues) {
+        const field = issue.path[0]
+
+        if (typeof field === "string") {
+          errors[field] = issue.message
+        }
+      }
+
+      setCreateTransactionError(errors)
+      return;
+    }
+
+    setCreateTransactionError({});
+
     try {
       setAddingTransaction(true)
       const response = await createTransaction({ accountId, categoryId, amount, type, description, transactionDate });
@@ -130,6 +154,25 @@ export default function Transaction() {
 
   async function handleUpdateTransaction(e: React.SubmitEvent<HTMLFormElement>, id: number) {
     e.preventDefault()
+
+    const result = editTransactionSchema.safeParse({ accountId: editAccountId, categoryId: editCategoryId, type: editType, amount: editAmount, transactionDate: editTransactionDate, description: editDescription })
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+
+      for (const issue of result.error.issues) {
+        const field = issue.path[0]
+
+        if (typeof field === "string") {
+          errors[field] = issue.message
+        }
+      }
+
+      setEditTransactionError(errors)
+      return;
+    }
+
+    setEditTransactionError({});
+
     try {
       setEditingTransaction(true)
       const response = await updateTransaction(id, { accountId: editAccountId, categoryId: editCategoryId, amount: editAmount, type: editType, description: editDescription, transactionDate: editTransactionDate });
@@ -160,7 +203,7 @@ export default function Transaction() {
       dispatch(setPagination(response.data.pagination))
     } catch (err) {
       dispatch(setError("Could not filter Trnasactions"));
-    } 
+    }
   }
 
   async function handleNextPage() {
@@ -241,6 +284,11 @@ export default function Transaction() {
                   </option>
                 ))}
               </select>
+              {createTransactionError.accountId && (
+                <p className="mt-1 text-sm text-red-600">
+                  {createTransactionError.accountId}
+                </p>
+              )}
             </div>
 
             <div>
@@ -261,6 +309,11 @@ export default function Transaction() {
                   </option>
                 ))}
               </select>
+              {createTransactionError.categoryId && (
+                <p className="mt-1 text-sm text-red-600">
+                  {createTransactionError.categoryId}
+                </p>
+              )}
             </div>
 
             <div>
@@ -278,6 +331,11 @@ export default function Transaction() {
                 <option value="income">Income</option>
                 <option value="expense">Expense</option>
               </select>
+              {createTransactionError.type && (
+                <p className="mt-1 text-sm text-red-600">
+                  {createTransactionError.type}
+                </p>
+              )}
             </div>
 
             <div>
@@ -293,6 +351,11 @@ export default function Transaction() {
                 }
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
+              {createTransactionError.amount && (
+                <p className="mt-1 text-sm text-red-600">
+                  {createTransactionError.amount}
+                </p>
+              )}
             </div>
 
             <div>
@@ -308,6 +371,11 @@ export default function Transaction() {
                 }
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
+              {createTransactionError.transactionDate && (
+                <p className="mt-1 text-sm text-red-600">
+                  {createTransactionError.transactionDate}
+                </p>
+              )}
             </div>
 
             <div className="sm:col-span-2 lg:col-span-1">
@@ -324,6 +392,11 @@ export default function Transaction() {
                 placeholder="What was this transaction for?"
                 className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
+              {createTransactionError.description && (
+                <p className="mt-1 text-sm text-red-600">
+                  {createTransactionError.description}
+                </p>
+              )}
             </div>
 
             <div className="sm:col-span-2 lg:col-span-3">
@@ -477,7 +550,7 @@ export default function Transaction() {
             <h2 className="text-xl font-semibold text-gray-900">
               Transaction History
             </h2>
- 
+
           </div>
 
           {transcations.length === 0 ? (
@@ -504,106 +577,145 @@ export default function Transaction() {
                       }
                       className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
                     >
-                      <select
-                        value={editAccountId}
-                        onChange={(e) =>
-                          setEditAccountId(
-                            Number(
-                              e.target.value
+                      <div>
+                        <select
+                          value={editAccountId}
+                          onChange={(e) =>
+                            setEditAccountId(
+                              Number(
+                                e.target.value
+                              )
                             )
-                          )
-                        }
-                        className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      >
-                        {accounts.map(
-                          (account) => (
-                            <option
-                              key={account.id}
-                              value={account.id}
-                            >
-                              {account.name}
-                            </option>
-                          )
+                          }
+                          className="rounded-lg border w-full border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        >
+                          {accounts.map(
+                            (account) => (
+                              <option
+                                key={account.id}
+                                value={account.id}
+                              >
+                                {account.name}
+                              </option>
+                            )
+                          )}
+                        </select>
+                        {editTransactionError.accountId && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {editTransactionError.accountId}
+                          </p>
                         )}
-                      </select>
+                      </div>
+                      <div>
 
-                      <select
-                        value={editCategoryId}
-                        onChange={(e) =>
-                          setEditCategoryId(
-                            Number(
-                              e.target.value
+                        <select
+                          value={editCategoryId}
+                          onChange={(e) =>
+                            setEditCategoryId(
+                              Number(
+                                e.target.value
+                              )
                             )
-                          )
-                        }
-                        className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      >
-                        {categories.map(
-                          (category) => (
-                            <option
-                              key={category.id}
-                              value={
-                                category.id
-                              }
-                            >
-                              {category.name}
-                            </option>
-                          )
+                          }
+                          className="rounded-lg border border-gray-300 w-full bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        >
+                          {categories.map(
+                            (category) => (
+                              <option
+                                key={category.id}
+                                value={
+                                  category.id
+                                }
+                              >
+                                {category.name}
+                              </option>
+                            )
+                          )}
+                        </select>
+                        {editTransactionError.categoryId && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {editTransactionError.categoryId}
+                          </p>
                         )}
-                      </select>
+                      </div>
+                      <div>
+                        <select
+                          value={editType}
+                          onChange={(e) =>
+                            setEditType(
+                              e.target.value as TransactionType
+                            )
+                          }
+                          className="rounded-lg border border-gray-300 w-full bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        >
+                          <option value="income">
+                            Income
+                          </option>
+                          <option value="expense">
+                            Expense
+                          </option>
+                        </select>
+                        {editTransactionError.type && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {editTransactionError.type}
+                          </p>
+                        )}
+                      </div>
+                      <div>
 
-                      <select
-                        value={editType}
-                        onChange={(e) =>
-                          setEditType(
-                            e.target.value as TransactionType
-                          )
-                        }
-                        className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      >
-                        <option value="income">
-                          Income
-                        </option>
-                        <option value="expense">
-                          Expense
-                        </option>
-                      </select>
-
-                      <input
-                        type="number"
-                        value={editAmount}
-                        onChange={(e) =>
-                          setEditAmount(
-                            Number(
+                        <input
+                          type="number"
+                          value={editAmount}
+                          onChange={(e) =>
+                            setEditAmount(
+                              Number(
+                                e.target.value
+                              )
+                            )
+                          }
+                          className="rounded-lg border border-gray-300 px-3 py-2.5 w-full text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                        {editTransactionError.amount && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {editTransactionError.amount}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <input
+                          type="date"
+                          value={new Date(editTransactionDate).toISOString().split('T')[0]}
+                          onChange={(e) =>
+                            setEditTransactionDate(
                               e.target.value
                             )
-                          )
-                        }
-                        className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      />
+                          }
+                          className="rounded-lg border border-gray-300 px-3 py-2.5 w-full text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                        {editTransactionError.transactionDate && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {editTransactionError.transactionDate}
+                          </p>
+                        )}
+                      </div>
 
-                      <input
-                        type="date"
-                        value={
-                          editTransactionDate
-                        }
-                        onChange={(e) =>
-                          setEditTransactionDate(
-                            e.target.value
-                          )
-                        }
-                        className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      />
+                      <div>
 
-                      <textarea
-                        value={editDescription}
-                        onChange={(e) =>
-                          setEditDescription(
-                            e.target.value
-                          )
-                        }
-                        className="resize-none rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      />
+                        <textarea
+                          value={editDescription}
+                          onChange={(e) =>
+                            setEditDescription(
+                              e.target.value
+                            )
+                          }
+                          className="resize-none rounded-lg border border-gray-300 px-3 py-2.5 w-full text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        />
+                        {editTransactionError.description && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {editTransactionError.description}
+                          </p>
+                        )}
+                      </div>
 
                       <div className="flex gap-2 sm:col-span-2 lg:col-span-3">
                         <button
@@ -616,9 +728,7 @@ export default function Transaction() {
 
                         <button
                           type="button"
-                          onClick={() =>
-                            setEditId(null)
-                          }
+                          onClick={() =>{setEditId(null); setEditTransactionError({})}}
                           className="rounded-lg cursor-pointer border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
                           Cancel
@@ -638,9 +748,9 @@ export default function Transaction() {
 
                           <span
                             className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${transaction.type ===
-                                "income"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
+                              "income"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
                               }`}
                           >
                             {transaction.type}
@@ -668,9 +778,9 @@ export default function Transaction() {
                       <div className="flex flex-col items-start gap-3 sm:items-end">
                         <p
                           className={`text-xl font-bold ${transaction.type ===
-                              "income"
-                              ? "text-green-600"
-                              : "text-red-600"
+                            "income"
+                            ? "text-green-600"
+                            : "text-red-600"
                             }`}
                         >
                           {transaction.type ===

@@ -1,19 +1,42 @@
-import React, { useState, type CSSProperties } from 'react'
+import React, { useState } from 'react'
 import { useAppDispatch } from '../../hooks/redux'
 import { loginUser } from '../../api/auth.api';
 import { setCredentials } from '../../store/slices/authSlice';
 import { Link } from 'react-router-dom';
 import ButtonLoader from '../../components/ButtonLoader';
- 
+import { loginSchema } from '../../schema/auth.schema';
+
 export default function Login() {
     const dispatch = useAppDispatch();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({})
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
+
+        const result = loginSchema.safeParse({
+            email, password
+        })
+
+        if (!result.success) {
+            const errors: Record<string, string> = {};
+
+            for (const issue of result.error.issues) {
+                const field = issue.path[0];
+
+                if (typeof field === "string") {
+                    errors[field] = issue.message;
+                }
+            }
+
+            setFormErrors(errors);
+            return;
+        }
+
+        setFormErrors({});
 
         try {
             setIsSubmitting(true)
@@ -22,7 +45,7 @@ export default function Login() {
                 user: response.data.user,
                 token: response.data.token
             }));
-            setTimeout(()=>{ window.location.href = "/dashboard" },1500)
+            setTimeout(() => { window.location.href = "/dashboard" }, 1500)
         } catch (err) {
             console.log("Login Failed: ", err)
         } finally {
@@ -62,6 +85,11 @@ export default function Login() {
                             className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             placeholder="you@example.com"
                         />
+                        {formErrors.email && (
+                            <p className="mt-1 text-sm text-red-600">
+                                {formErrors.email}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -80,6 +108,11 @@ export default function Login() {
                             className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             placeholder="Enter your password"
                         />
+                        {formErrors.password && (
+                            <p className="mt-1 text-sm text-red-600">
+                                {formErrors.password}
+                            </p>
+                        )}
                     </div>
 
                     <button
@@ -97,7 +130,7 @@ export default function Login() {
                         >
                             Register
                         </Link>
- 
+
                     </p>
                 </form>
             </div>
