@@ -14,6 +14,8 @@ import {
     CartesianGrid,
 } from 'recharts'
 import type { PieSectorShapeProps } from "recharts";
+import { getAccounts } from "../../api/account.api";
+import { setAccount, setError as setAccountError } from "../../store/slices/accountSlice";
 
 const CustomPieShape = (props: PieSectorShapeProps) => {
     const { index } = props;
@@ -48,14 +50,15 @@ const COLORS = [
 
 export default function Dashboard() {
     const dispatch = useAppDispatch();
-    const { categorySummary, monthlySummary, error, loading, summary } = useAppSelector(state => state.dashboard);
+    const { categorySummary, monthlySummary, error, loading, summary, } = useAppSelector(state => state.dashboard);
     const { transcations } = useAppSelector(state => state.transaction);
+    const { accounts } = useAppSelector(state => state.account);
     const expenseData = categorySummary.filter((item) => item.type === 'expense').map((item, index) => ({
         name: item.category,
         value: Number(item.total),
         fill: COLORS[index % COLORS.length]
     }))
- 
+
 
     useEffect(() => {
         async function fetchRecentTransactions() {
@@ -110,6 +113,18 @@ export default function Dashboard() {
         fetchCategorySummary()
     }, [])
 
+    useEffect(() => {
+        async function fetchAccounts() {
+            try {
+                const response = await getAccounts();
+                dispatch(setAccount(response.data))
+            } catch (err) {
+                dispatch(setAccountError("Could not fetch account"))
+            }
+        }
+        fetchAccounts()
+    }, [dispatch])
+
     if (loading) {
         return <Loading />
     }
@@ -150,6 +165,18 @@ export default function Dashboard() {
 
                         <p className="mt-2 text-2xl font-bold text-red-600">
                             {formatCurrency(summary.totalExpense)}
+                        </p>
+                    </div>
+
+                    <div className="rounded-xl bg-white p-6 shadow-sm">
+                        <p className="text-sm font-medium text-gray-500">
+                            Total Balance
+                        </p>
+
+                        <p className="mt-2 text-2xl font-bold text-blue-500">
+                            {formatCurrency(accounts.reduce((accumulator, account) => {
+                                return accumulator + Number(account.balance)
+                            }, 0))}
                         </p>
                     </div>
 
