@@ -262,18 +262,23 @@ export async function modifyTransaction(
   values.push(id);
   values.push(userId);
 
-  const result = await client.query(
-    `UPDATE transactions SET ${fields.join(
-      ", "
-    )}, updated_at = CURRENT_TIMESTAMP
-                                     WHERE id = $${
-                                       values.length - 1
-                                     } AND user_id = $${
-      values.length
-    } RETURNING id,
-                                     user_id, account_id, category_id, amount, type, description, transaction_date, created_at, updated_at`,
-    values
-  );
+  const query = `
+    WITH updated_tx AS (
+      UPDATE transactions 
+      SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $${values.length - 1} AND user_id = $${values.length}
+      RETURNING id, user_id, account_id, category_id, amount, type, description, transaction_date, created_at, updated_at
+    )
+    SELECT 
+      t.*,
+      a.name AS account_name,
+      c.name AS category_name
+    FROM updated_tx t
+    LEFT JOIN accounts a ON t.account_id = a.id
+    LEFT JOIN categories c ON t.category_id = c.id
+  `;
+
+  const result = await client.query(query, values);
 
   return result.rows[0];
 }
