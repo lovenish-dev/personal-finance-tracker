@@ -11,6 +11,7 @@ import formatCurrency from "../../utils/formatCurrency";
 import Loading from "../../components/Loading";
 import ButtonLoader from "../../components/ButtonLoader";
 import { createTransactionSchema, editTransactionSchema } from "../../schema/transactions.schema";
+import { formatDate } from "../../utils/formatDate";
 
 export default function Transaction() {
   const dispatch = useAppDispatch();
@@ -228,7 +229,7 @@ export default function Transaction() {
     setEditAmount(Number(transaction.amount));
     setEditType(transaction.type);
     setEditDescription(transaction.description);
-    setEditTransactionDate(transaction.transaction_date);
+    setEditTransactionDate(formatDate(transaction.transaction_date));
   }
 
   if (loading) {
@@ -684,7 +685,7 @@ export default function Transaction() {
                       <div>
                         <input
                           type="date"
-                          value={new Date(editTransactionDate).toISOString().split('T')[0]}
+                          value={editTransactionDate}
                           onChange={(e) =>
                             setEditTransactionDate(
                               e.target.value
