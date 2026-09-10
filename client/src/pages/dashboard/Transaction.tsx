@@ -12,6 +12,8 @@ import Loading from "../../components/Loading";
 import ButtonLoader from "../../components/ButtonLoader";
 import { createTransactionSchema, editTransactionSchema } from "../../schema/transactions.schema";
 import { formatDate } from "../../utils/formatDate";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import { Toaster } from "react-hot-toast";
 
 export default function Transaction() {
   const dispatch = useAppDispatch();
@@ -26,7 +28,6 @@ export default function Transaction() {
 
   const [createTransactionError, setCreateTransactionError] = useState<Record<string, string>>({})
   const [editTransactionError, setEditTransactionError] = useState<Record<string, string>>({})
-
 
   const [editAccountId, setEditAccountId] = useState(0);
   const [editCategoryId, setEditCategoryId] = useState(0);
@@ -136,7 +137,9 @@ export default function Transaction() {
       setAddingTransaction(true)
       const response = await createTransaction({ accountId, categoryId, amount, type, description, transactionDate });
       dispatch(addTransactions(response.data));
+      showSuccessToast("Transaction created successfully")
     } catch (err) {
+      showErrorToast("Could not create transaction")
       dispatch(setError("Could not create transaction"))
     } finally {
       setAddingTransaction(false)
@@ -147,8 +150,10 @@ export default function Transaction() {
     try {
       const response = await deleteTrasaction(id);
       dispatch(removeTransaction(id))
+      showSuccessToast("Trasaction deleted successfully")
       return response.data
     } catch (err) {
+      showErrorToast("Could not delete transaction")
       dispatch(setError("Could not delete transaction"))
     }
   }
@@ -179,7 +184,9 @@ export default function Transaction() {
       const response = await updateTransaction(id, { accountId: editAccountId, categoryId: editCategoryId, amount: editAmount, type: editType, description: editDescription, transactionDate: editTransactionDate });
       dispatch(modifyTransaction(response.data.transaction))
       setEditId(null)
+      showSuccessToast("Transaction updated successfully")
     } catch (err) {
+      showErrorToast("Could not update transaction")
       dispatch(setError("Could not update transaction"))
     } finally {
       setEditingTransaction(false)
@@ -238,6 +245,7 @@ export default function Transaction() {
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+      <Toaster />
       <div className="mx-auto max-w-6xl">
 
         {/* Header */}

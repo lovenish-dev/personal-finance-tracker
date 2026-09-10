@@ -6,6 +6,8 @@ import type { CategoryType } from "../../types/category.types";
 import Loading from "../../components/Loading";
 import ButtonLoader from "../../components/ButtonLoader";
 import { createCategorySchema, editCategorySchema } from "../../schema/categories.schema";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import { Toaster } from "react-hot-toast";
 
 export default function Category() {
     const dispatch = useAppDispatch();
@@ -64,7 +66,9 @@ export default function Category() {
             setAddingCategory(true)
             const response = await createCategory({ name, type });
             dispatch(addCategories(response.data))
+            showSuccessToast("Category created successfully")
         } catch (err) {
+            showErrorToast("Could not create category")
             dispatch(setError("Couldn't fetch categories"))
         } finally {
             setAddingCategory(false)
@@ -76,7 +80,9 @@ export default function Category() {
         try {
             const response = await deleteSingleCategory(id);
             dispatch(removeCategory(response.data.id))
+            showSuccessToast("Category deleted successfully")
         } catch (err) {
+            showErrorToast("Could not delete category")
             dispatch(setError("Could not delete category"))
         }
     }
@@ -108,7 +114,9 @@ export default function Category() {
 
             seteditName("")
             setEditId(null)
+            showSuccessToast("Category updated successfully")
         } catch (err) {
+            showErrorToast("Could not update cagtegory")
             dispatch(setError("Could not update category"))
         } finally {
             setEditingCategory(false)
@@ -117,6 +125,7 @@ export default function Category() {
 
     return (
         <section className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+            <Toaster />
             <div className="mx-auto max-w-5xl">
 
                 {/* Header */}

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/auth/login"
 import ProtectedRoutes from "./ProtectedRoutes";
 import Account from "../pages/dashboard/Account";
@@ -16,6 +16,8 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoutes />}>
         <Route element={<AppLayout />} >
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/accounts" element={<Account />} />
           <Route path="/categories" element={<Category />} />
           <Route path="/transactions" element={<Transaction />} />

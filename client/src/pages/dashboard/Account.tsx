@@ -7,6 +7,8 @@ import formatCurrency from "../../utils/formatCurrency";
 import Loading from "../../components/Loading";
 import ButtonLoader from "../../components/ButtonLoader";
 import { createAccountSchema, editAccountSchema } from "../../schema/account.schema";
+import { Toaster } from "react-hot-toast";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 export default function Account() {
     const dispatch = useAppDispatch();
@@ -67,7 +69,9 @@ export default function Account() {
 
             setEditingId(null);
             seteditName("");
+            showSuccessToast("Account updated successfully")
         } catch (err) {
+            showErrorToast("Could not update account")
             dispatch(setError("Failed to update Account"))
         } finally {
             setEditingAccount(false)
@@ -100,7 +104,9 @@ export default function Account() {
 
             setName("")
             setBalance(0)
+            showSuccessToast("Account created successfully")
         } catch (err) {
+            showErrorToast("Could not create account")
             dispatch(setError("Failed to create account"))
         } finally {
             setAddingAccount(false)
@@ -111,13 +117,16 @@ export default function Account() {
         try {
             const response = await deleteAccount(id);
             dispatch(removeAccount(response.data.id))
+            showSuccessToast("Account deleted successfully")
         } catch (err) {
+            showErrorToast("Could not delete account")
             dispatch(setError("Failed to delete account"))
         }
     }
 
     return (
         <section className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+            <Toaster />
 
             <div className="mx-auto max-w-5xl">
 
@@ -285,8 +294,7 @@ export default function Account() {
 
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        {setEditingId(null); setEditAcccountErrors({});}
+                                                    onClick={() => { setEditingId(null); setEditAcccountErrors({}); }
                                                     }
                                                     className="flex-1 rounded-lg border cursor-pointer border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                                                 >

@@ -5,6 +5,8 @@ import { setCredentials } from '../../store/slices/authSlice';
 import { Link } from 'react-router-dom';
 import ButtonLoader from '../../components/ButtonLoader';
 import { loginSchema } from '../../schema/auth.schema';
+import { Toaster } from 'react-hot-toast';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 
 export default function Login() {
     const dispatch = useAppDispatch();
@@ -46,7 +48,9 @@ export default function Login() {
                 token: response.data.token
             }));
             setTimeout(() => { window.location.href = "/dashboard" }, 1500)
+            showSuccessToast("Logged in successfully")
         } catch (err) {
+            showErrorToast("Login failed")
             console.log("Login Failed: ", err)
         } finally {
             setIsSubmitting(false)
@@ -55,6 +59,7 @@ export default function Login() {
 
     return (
         <section className="flex min-h-screen items-center justify-center bg-gray-100 px-6">
+            <Toaster />
             <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-sm">
 
                 <div className="mb-8 text-center">

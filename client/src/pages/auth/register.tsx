@@ -5,6 +5,8 @@ import { setCredentials } from "../../store/slices/authSlice";
 import { Link } from "react-router-dom";
 import ButtonLoader from "../../components/ButtonLoader";
 import { registerSchema } from "../../schema/auth.schema";
+import { Toaster } from "react-hot-toast";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 export default function Register() {
   const dispatch = useAppDispatch();
@@ -13,7 +15,6 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
@@ -38,20 +39,24 @@ export default function Register() {
     setFormErrors({});
     try {
       setIsSubmitting(true)
-      if (password.trim() !== confirmPassword.trim()) { setError("Passwords do not match"); return }
       const response = await registerUser({ name, email, password });
       dispatch(setCredentials(response.data));
+      
       setTimeout(() => {
         window.location.href = "/login"
       }, 1500)
+
+      showSuccessToast("User Registered, you can login now");
     } catch (err) {
-      setError("Could not register user")
+      showErrorToast("Could not register user");
     } finally {
       setIsSubmitting(false)
     }
   }
+
   return (
     <section className="flex min-h-screen items-center justify-center bg-gray-100 px-6">
+      <Toaster />
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-sm">
 
         <div className="mb-8 text-center">
@@ -63,13 +68,7 @@ export default function Register() {
             Start managing your finances today
           </p>
         </div>
-
-        {error && (
-          <p className="mb-5 rounded-md bg-red-100 p-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
-
+ 
         <form onSubmit={handleSubmit} className="space-y-5">
 
           <div>
