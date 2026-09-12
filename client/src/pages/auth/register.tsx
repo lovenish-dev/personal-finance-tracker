@@ -7,6 +7,7 @@ import ButtonLoader from "../../components/ButtonLoader";
 import { registerSchema } from "../../schema/auth.schema";
 import { Toaster } from "react-hot-toast";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import { RiEyeCloseLine, RiEyeLine } from "@remixicon/react";
 
 export default function Register() {
   const dispatch = useAppDispatch();
@@ -17,6 +18,8 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -41,7 +44,7 @@ export default function Register() {
       setIsSubmitting(true)
       const response = await registerUser({ name, email, password });
       dispatch(setCredentials(response.data));
-      
+
       setTimeout(() => {
         window.location.href = "/login"
       }, 1500)
@@ -54,6 +57,12 @@ export default function Register() {
     }
   }
 
+  function togglePasswordVisibility(){
+    setShowPassword(prev => !prev)
+  }
+  function toggleConfirmPasswordVisibility(){
+    setShowConfirmPassword(prev => !prev)
+  }
   return (
     <section className="flex min-h-screen items-center justify-center bg-gray-100 px-6">
       <Toaster />
@@ -68,7 +77,7 @@ export default function Register() {
             Start managing your finances today
           </p>
         </div>
- 
+
         <form onSubmit={handleSubmit} className="space-y-5">
 
           <div>
@@ -125,14 +134,17 @@ export default function Register() {
               Password
             </label>
 
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              placeholder="Enter your password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                placeholder="Enter your password"
+              />
+              <p className='text-gray-700 absolute top-2.5 right-2' onClick={togglePasswordVisibility}>{showPassword ? <RiEyeCloseLine /> : <RiEyeLine />}</p>
+            </div>
             {formErrors.password && (
               <p className="mt-1 text-sm text-red-600">
                 {formErrors.password}
@@ -148,14 +160,17 @@ export default function Register() {
               Confirm Password
             </label>
 
-            <input
-              type="password"
-              id="confirm-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              placeholder="Confirm your password"
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                id="confirm-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                placeholder="Confirm your password"
+              />
+              <p className='text-gray-700 absolute top-2.5 right-2' onClick={toggleConfirmPasswordVisibility}>{showConfirmPassword ? <RiEyeCloseLine /> : <RiEyeLine />}</p>
+            </div>
             {formErrors.confirmPassword && (
               <p className="mt-1 text-sm text-red-600">
                 {formErrors.confirmPassword}

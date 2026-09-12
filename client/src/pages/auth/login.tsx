@@ -7,6 +7,7 @@ import ButtonLoader from '../../components/ButtonLoader';
 import { loginSchema } from '../../schema/auth.schema';
 import { Toaster } from 'react-hot-toast';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
+import { RiEyeCloseLine, RiEyeLine } from '@remixicon/react';
 
 export default function Login() {
     const dispatch = useAppDispatch();
@@ -14,7 +15,12 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+    const [showPassword, setShowPassword] = useState<boolean>(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    function togglePasswordVisibility() {
+        setShowPassword((prev) => !prev)
+    }
 
     async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -105,14 +111,17 @@ export default function Login() {
                             Password
                         </label>
 
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                            placeholder="Enter your password"
-                        />
+                        <div className="relative">
+                            <input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                placeholder="Enter your password"
+                            />
+                            <p className='text-gray-700 absolute top-2.5 right-2' onClick={togglePasswordVisibility}>{showPassword ? <RiEyeCloseLine /> : <RiEyeLine />  }</p>
+                        </div>
                         {formErrors.password && (
                             <p className="mt-1 text-sm text-red-600">
                                 {formErrors.password}
